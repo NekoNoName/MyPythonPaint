@@ -67,12 +67,16 @@ class Paint(object):
         self.algo_button = Button(self.root, text='Lineas', command=self.do_something)
         self.algo_button.grid(row=0, column=18)
 
+        #Boton Elipse
+        self.elipse_button = Button(self.root, text="Elipse", command= self.elipse)
+        self.elipse_button.grid(row=0, column=20)    
+
         #Resto de botones que vinieron con el codigo
         self.color_button = Button(self.root, text='color', command=self.choose_color)
-        self.color_button.grid(row=0, column=20)
+        self.color_button.grid(row=0, column=22)
 
         self.eraser_button = Button(self.root, text='eraser', command=self.use_eraser)
-        self.eraser_button.grid(row=0, column=22)
+        self.eraser_button.grid(row=0, column=23)
 
         self.choose_size_button = Scale(self.root, from_=1, to=100, orient=HORIZONTAL)
         self.choose_size_button.grid(row=0, column=24)
@@ -106,6 +110,9 @@ class Paint(object):
 
         self.cy=Entry(self.root)
         self.cy.grid(row=3, column=8)
+
+        self.ry=Entry(self.root)
+        self.ry.grid(row=1, column=20)
 
         #Entrada de Datos Triangulo
         self.tr= Entry(self.root)
@@ -304,6 +311,16 @@ class Paint(object):
         self.circleImg=self.drawCircleDDA(self.rad, cx, cy,self.paper)
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
 
+    #Funcion elipse
+    def elipse(self):
+        cx= int(self.cx.get())
+        cy= int(self.cy.get())
+        self.circle=True
+        self.line_DDA=False
+        self.radX=float(self.cir.get())
+        self.radY=float(self.ry.get())
+        self.elipseImg=self.drawElipse(cx,cy,self.radX, self.radY, self.colors, self.paper)
+        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.elipseImg)
     #Funcion Triangulo
     def triangulo(self):
         x1=int(self.tr.get())
@@ -337,6 +354,8 @@ class Paint(object):
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
         self.lineImg=self.drawDDA(x2,y1,x2,y2, self.paper)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
+
+
 
     #Escoger Color
     def choose_color(self):
@@ -455,46 +474,45 @@ class Paint(object):
         return circleImg
         #print("fin")
     
-        def elipseputpixel(centroX, centroY, x, y, color, img):
-            img.putpixel((centroX+x, centroY+y), color)
-            img.putpixel((centroX-x, centroY+y), color)
-            img.putpixel((centroX+x, centroY-y), color)
-            img.putpixel((centroX-x, centroY-y), color)
+    def elipseputpixel(self,centroX, centroY, x, y, color, img):
+        img.putpixel((centroX+x, centroY+y), color)
+        img.putpixel((centroX-x, centroY+y), color)
+        img.putpixel((centroX+x, centroY-y), color)
+        img.putpixel((centroX-x, centroY-y), color)
             
-        def elipseMidPoint(centroX,centroY, rx, ry, color, img):
-            rxSq = rx ** 2
-            rySq = ry ** 2
-            x = 0
-            y = ry
-            px = 0
-            py = 2 * rxSq * y
-            elipseputpixel(centerX, centroY, x, y, color, img)
-            p = rySq - (rxSq * ry) + (0.25 * rxSq)
-            while px < py:
-                x = x + 1
-                px = px + 2*rySq
-                if p < 0:
-                    p = p + rySq + px
-                else:
-                    y = y - 1
-                    py = py - 2*rxSq
-                    p = p + rySq + px - py
-                 elipseputpixel(centerX, centroY, x, y, color, img)
-
-            p = rySq*(x+0.5)*(x+0.5) + rxSq*(y-1)*(y-1) - rxSq*rySq
-            while y > 0:
+    def drawElipse(self,centroX,centroY, rx, ry, color, img):
+        rxSq = rx ** 2
+        rySq = ry ** 2
+        x = 0
+        y = int(ry)
+        px = 00
+        self.elipseputpixel(centroX, centroY, x, y, color, img)
+        p = rySq - (rxSq * ry) + (0.25 * rxSq)
+        while px < py:
+            x = x + 1
+            px = px + 2*rySq
+            if p < 0:
+                p = p + rySq + px
+            else:
                 y = y - 1
-                py = py - 2 * rxSq;
-                if p > 0:
-                    p = p + rxSq - py;
-                else:
-                    x = x + 1
-                    px = px + 2 * rySq;
-                    p = p + rxSq - py + px;
-                 elipseputpixel(centerX, centroY, x, y, color, img)
+                py = py - 2*rxSq
+                p = p + rySq + px - py
+            self.elipseputpixel(centroX, centroY, x, y, color, img)
 
-            eclipseImg = ImageTk.PhotoImage(img)
-            return eclipseImg
+        p = rySq*(x+0.5)*(x+0.5) + rxSq*(y-1)*(y-1) - rxSq*rySq
+        while y > 0:
+            y = y - 1
+            py = py - 2 * rxSq;
+            if p > 0:
+                p = p + rxSq - py;
+            else:
+                x = x + 1
+                px = px + 2 * rySq;
+                p = p + rxSq - py + px;
+            self.elipseputpixel(centroX, centroY, x, y, color, img)
+
+        eclipseImg = ImageTk.PhotoImage(img)
+        return eclipseImg
     
     #Para saber las coordenadas del cursor en el canvas
     def canxy(self, event):
