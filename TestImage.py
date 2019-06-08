@@ -175,9 +175,9 @@ class Paint(object):
 
 
     #Funcion para iniciar datos, vino con el codigo base pero decidi aprovecharlo
+                       
     def setup(self):
-
-        
+    
         self.old_x = None
         self.old_y = None
         self.line_width = self.choose_size_button.get()
@@ -240,19 +240,30 @@ class Paint(object):
                     self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
                 self.points.clear()
 
-    def onClickLine(self):
-        pass
+    def onClickPress(self, event):
+        self.x, self.y = event.x, event.y
 
-    def onMotionLine(self):
-        pass
+    def onMotionLine(self, event):
+        x1,y1 =self.x, self.y
+        x2, y2 = event.x, event.y
+        paper=copy.copy(self.paper)
+        self.lineImg=self.drawDDA(x1,y1,x2,y2, paper)
+        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.lineImg)
 
-    def onReleaseLine(self):
-        pass
+    def onReleaseLine(self, event):
+        x1,y1 =self.x, self.y
+        x2, y2 = event.x, event.y
+        
+        self.lineImg=self.drawDDA(x1,y1,x2,y2, self.paper)
+        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.lineImg)
 
 
     #Corre Algoritmo DDA
     def dda(self):
-        #self.activate_button(self.brush_button)
+        self.activate_button(self.brush_button)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onMotionLine)
+        self.c.bind("<ButtonRelease-1>", self.onReleaseLine)
         #self.lapiz_on=False
         self.label1.config(text="DDA")
         self.line_DDA=True
@@ -536,34 +547,30 @@ class Paint(object):
 
         #Relleno
     def fillColor(self, center, img):
-        
         print ('center ', center)
         newColor=self.colors
         oldColor = self.paper.getpixel(center)
-        print(oldColor, newColor)
-        paper=self.paper
         if oldColor == newColor:
             return
             
 
-        listSeed = []
-        listSeed.append(center)
-        while listSeed:
-            print("Hola entro")
-            seed = listSeed.pop(0)
+        listaPixRelleno = []
+        listaPixRelleno.append(center)
+        while listaPixRelleno:
+            seed = listaPixRelleno.pop(0)
             try:
-                seedColor = paper.getpixel(seed)
+                seedColor = img.getpixel(seed)
             except IndexError:
                 seedColor = None
             if  seedColor == oldColor:
-                paper.putpixel(seed, newColor)
+                img.putpixel(seed, newColor)
                 x, y = seed[0], seed[1]
-                listSeed.append((x+1, y))
-                listSeed.append((x-1, y))
-                listSeed.append((x, y+1))
-                listSeed.append((x, y-1))
+                listaPixRelleno.append((x+1, y))
+                listaPixRelleno.append((x-1, y))
+                listaPixRelleno.append((x, y+1))
+                listaPixRelleno.append((x, y-1))
 
-        filledImg = ImageTk.PhotoImage(paper)
+        filledImg = ImageTk.PhotoImage(img)
         
         print("fin")
         return filledImg
