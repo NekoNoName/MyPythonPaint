@@ -71,6 +71,11 @@ class Paint(object):
         self.elipse_button = Button(self.root, text="Elipse", command= self.elipse)
         self.elipse_button.grid(row=0, column=20)    
 
+        #Boton Relleno
+        self.fill_button = Button (self.root, text="Relleno", command=self.fill)
+        self.fill_button.grid(row=0, column=24)
+
+
         #Resto de botones que vinieron con el codigo
         self.color_button = Button(self.root, text='color', command=self.choose_color)
         self.color_button.grid(row=0, column=22)
@@ -78,8 +83,10 @@ class Paint(object):
         self.eraser_button = Button(self.root, text='eraser', command=self.use_eraser)
         self.eraser_button.grid(row=0, column=23)
 
+
+
         self.choose_size_button = Scale(self.root, from_=1, to=100, orient=HORIZONTAL)
-        self.choose_size_button.grid(row=0, column=24)
+        self.choose_size_button.grid(row=0, column=25)
 
 
         #El Canvas
@@ -355,8 +362,9 @@ class Paint(object):
         self.lineImg=self.drawDDA(x2,y1,x2,y2, self.paper)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
 
-
-
+    #Funcion relleno
+    def fill(self):
+        pass
     #Escoger Color
     def choose_color(self):
         self.eraser_on = False
