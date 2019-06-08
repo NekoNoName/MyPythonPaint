@@ -451,21 +451,24 @@ class Paint(object):
             rx= rx-y/rx
             x= round(rx)
             y=y+1
-        lineImg = ImageTk.PhotoImage(img)
-        return lineImg
+        circleImg = ImageTk.PhotoImage(img)
+        return circleImg
         #print("fin")
     
-        def drawEclipse(centerPoint, x, y, color, img):
-            pass
+        def elipseputpixel(centroX, centroY, x, y, color, img):
+            img.putpixel((centroX+x, centroY+y), color)
+            img.putpixel((centroX-x, centroY+y), color)
+            img.putpixel((centroX+x, centroY-y), color)
+            img.putpixel((centroX-x, centroY-y), color)
             
-        def eclipseMidPoint(centerPoint, rx, ry, color, img):
+        def elipseMidPoint(centroX,centroY, rx, ry, color, img):
             rxSq = rx ** 2
             rySq = ry ** 2
             x = 0
             y = ry
             px = 0
             py = 2 * rxSq * y
-            drawEclipse(centerPoint, x, y, color, img)
+            elipseputpixel(centerX, centroY, x, y, color, img)
             p = rySq - (rxSq * ry) + (0.25 * rxSq)
             while px < py:
                 x = x + 1
@@ -476,7 +479,7 @@ class Paint(object):
                     y = y - 1
                     py = py - 2*rxSq
                     p = p + rySq + px - py
-                drawEclipse(centerPoint, x, y, color, img)
+                 elipseputpixel(centerX, centroY, x, y, color, img)
 
             p = rySq*(x+0.5)*(x+0.5) + rxSq*(y-1)*(y-1) - rxSq*rySq
             while y > 0:
@@ -488,7 +491,7 @@ class Paint(object):
                     x = x + 1
                     px = px + 2 * rySq;
                     p = p + rxSq - py + px;
-                drawEclipse(centerPoint, x, y, color, img);
+                 elipseputpixel(centerX, centroY, x, y, color, img)
 
             eclipseImg = ImageTk.PhotoImage(img)
             return eclipseImg
