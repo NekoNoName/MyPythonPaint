@@ -222,8 +222,8 @@ class Paint(object):
                     dx=self.points[2]-self.points[0]
                     dy=self.points[3]-self.points[1]
                     leng=math.sqrt(dx**2+dy**2)
-                    self.drawCircleDDA(leng, self.points[0], self.points[1])
-
+                    self.circleImg=self.drawCircleDDA(leng, self.points[0], self.points[1], self.paper)
+                    self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
                 self.points.clear()
 
     def onClickLine(self):
@@ -301,7 +301,8 @@ class Paint(object):
         self.circle=True
         self.line_DDA=False
         self.rad=float(self.cir.get())
-        self.drawCircleDDA(self.rad, cx, cy)
+        self.circleImg=self.drawCircleDDA(self.rad, cx, cy,self.paper)
+        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
 
     #Funcion Triangulo
     def triangulo(self):
@@ -424,25 +425,21 @@ class Paint(object):
         return lineImg
         
 
-    def circleputpixel(self, x, y, cemtroX, cemtroY):
-        self.c.create_line(x+cemtroX  ,  y+cemtroY  ,  x+cemtroX  ,  y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+    def circleputpixel(self, x, y, cemtroX, cemtroY, img):
+        img.putpixel((cemtroX+x,cemtroY+y), self.colors)
+        img.putpixel((cemtroX-x,cemtroY+y), self.colors)
+        img.putpixel((cemtroX-x,cemtroY-y), self.colors)
+        img.putpixel((cemtroX+x,cemtroY-y), self.colors)
 
-        self.c.create_line(y+cemtroX  ,  x+cemtroY  ,  y+cemtroX  ,  x+cemtroY, width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+        img.putpixel((cemtroX+y,cemtroY+x), self.colors)
+        img.putpixel((cemtroX+y,cemtroY-x), self.colors)
+        img.putpixel((cemtroX-y,cemtroY+x), self.colors)
+        img.putpixel((cemtroX-y,cemtroY-x), self.colors)
 
-        self.c.create_line(-x+cemtroX,  y+cemtroY  ,  -x+cemtroX  ,  y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-        self.c.create_line(x+cemtroX  ,  -y+cemtroY  ,  x+cemtroX  ,  -y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-        self.c.create_line(-x+cemtroX  ,  -y+cemtroY  ,  -x+cemtroX  ,  -y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-        self.c.create_line(-y+cemtroX  ,  x+cemtroY  ,  -y+cemtroX  ,  x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-        self.c.create_line(y+cemtroX  ,  -x+cemtroY  ,  y+cemtroX  ,  -x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-        self.c.create_line(-y+cemtroX  ,  -x+cemtroY  ,  -y+cemtroX  ,  -x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-        
+       
+    
     #Algoritmo Circulo DDA
-    def drawCircleDDA(self,rad, cx, cy):
+    def drawCircleDDA(self,rad, cx, cy, img):
         print("Circle Algorithm")
         rx= rad
         x= round(rx)
@@ -450,13 +447,17 @@ class Paint(object):
         cemtroX=cx #Valor X de prueba del centro del circulo
         cemtroY=cy #Valor Y de prueba del centro del circulo
         while y<=x:
-            self.circleputpixel(x,y, cemtroX, cemtroY)
+            self.circleputpixel(x,y, cemtroX, cemtroY, img)
             rx= rx-y/rx
             x= round(rx)
             y=y+1
+        lineImg = ImageTk.PhotoImage(img)
+        return lineImg
         #print("fin")
     
-
+        def drawEclipse(centerPoint, x, y, color, img):
+            pass
+            
         def eclipseMidPoint(centerPoint, rx, ry, color, img):
             rxSq = rx ** 2
             rySq = ry ** 2
