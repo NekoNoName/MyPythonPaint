@@ -364,7 +364,13 @@ class Paint(object):
 
     #Funcion relleno
     def fill(self):
-        pass
+        self.activate_button(self.fill_button)
+        self.c.bind("<ButtonPress-1>", self.fillColors)
+        self.c.bind("<ButtonRelease-1>", self.release)
+
+    def release(self, event):
+        pass    
+
     #Escoger Color
     def choose_color(self):
         self.eraser_on = False
@@ -493,7 +499,8 @@ class Paint(object):
         rySq = ry ** 2
         x = 0
         y = int(ry)
-        px = 00
+        px = 0
+        py = 2 * rxSq * y
         self.elipseputpixel(centroX, centroY, x, y, color, img)
         p = rySq - (rxSq * ry) + (0.25 * rxSq)
         while px < py:
@@ -510,18 +517,56 @@ class Paint(object):
         p = rySq*(x+0.5)*(x+0.5) + rxSq*(y-1)*(y-1) - rxSq*rySq
         while y > 0:
             y = y - 1
-            py = py - 2 * rxSq;
+            py = py - 2 * rxSq
             if p > 0:
-                p = p + rxSq - py;
+                p = p + rxSq - py
             else:
                 x = x + 1
-                px = px + 2 * rySq;
-                p = p + rxSq - py + px;
+                px = px + 2 * rySq
+                p = p + rxSq - py + px
             self.elipseputpixel(centroX, centroY, x, y, color, img)
 
         eclipseImg = ImageTk.PhotoImage(img)
         return eclipseImg
     
+    def fillColors(self, event):
+        center=(event.x, event.y)
+        self.filledImg=self.fillColor(center, self.paper)
+        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image= self.filledImg)
+
+        #Relleno
+    def fillColor(self, center, img):
+        
+        print ('center ', center)
+        newColor=self.colors
+        oldColor = self.paper.getpixel(center)
+        print(oldColor, newColor)
+        paper=self.paper
+        if oldColor == newColor:
+            return
+            
+
+        listSeed = []
+        listSeed.append(center)
+        while listSeed:
+            print("Hola entro")
+            seed = listSeed.pop(0)
+            try:
+                seedColor = paper.getpixel(seed)
+            except IndexError:
+                seedColor = None
+            if  seedColor == oldColor:
+                paper.putpixel(seed, newColor)
+                x, y = seed[0], seed[1]
+                listSeed.append((x+1, y))
+                listSeed.append((x-1, y))
+                listSeed.append((x, y+1))
+                listSeed.append((x, y-1))
+
+        filledImg = ImageTk.PhotoImage(paper)
+        
+        print("fin")
+        return filledImg
     #Para saber las coordenadas del cursor en el canvas
     def canxy(self, event):
         self.root.title(" Algoritmos ( %i , %i)" %(event.x, event.y))
