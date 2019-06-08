@@ -7,7 +7,17 @@ from PIL import Image, ImageTk, ImageDraw, ImageColor
 
 
 class Paint(object):
-
+    red = (255,0,0)
+    dark = (0,0,0)
+    green = (0, 255, 0)
+    yellow = (255, 204, 0)
+    orange = (255, 102, 0)
+    white = (255,255, 255)
+    pink = (255, 186, 210)
+    blueLight = (0, 153, 204)
+    blueMalibu = (102, 204, 255)
+    purple = (102, 0, 204)  
+    colors=dark    
     DEFAULT_PEN_SIZE = 5.0
     DEFAULT_COLOR = 'black'
     x=0
@@ -153,11 +163,12 @@ class Paint(object):
     #Funcion para iniciar datos, vino con el codigo base pero decidi aprovecharlo
     def setup(self):
 
-
+        
         self.old_x = None
         self.old_y = None
         self.line_width = self.choose_size_button.get()
         self.color = self.DEFAULT_COLOR
+        
         self.eraser_on = False
         self.lapiz_on=True
         self.line=False
@@ -204,7 +215,9 @@ class Paint(object):
                     self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
 
                 else:
-                    self.drawBresenham(pointx, pointy, pointxf, pointyf)
+                    self.lineImg=self.drawBresenham(pointx, pointy, pointxf, pointyf, self.paper)
+                    self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
+
                 if self.circle:
                     dx=self.points[2]-self.points[0]
                     dy=self.points[3]-self.points[1]
@@ -278,7 +291,8 @@ class Paint(object):
             self.yf=int(self.t4.get())
 
 
-            self.drawBresenham(self.x,self.y,self.xf,self.yf)
+            self.lineImg=self.drawBresenham(self.x,self.y,self.xf,self.yf, self.paper)
+            self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
 
     #Funcion Circulo
     def circulo(self):
@@ -363,6 +377,7 @@ class Paint(object):
     #Algoritmo DDA
     def drawDDA(self,x1,y1,x2,y2, img):
             #x1,y1 = x1,y1
+            print("DDA line algorithm")
             self.length = abs(x2-x1) if abs(x2-x1) >= abs(y2-y1) else abs(y2-y1)
             if self.length>0:
                 dx = (x2-x1)/float(self.length)
@@ -370,39 +385,49 @@ class Paint(object):
 
                 for i in range(self.length):
                         #self.c.create_line(x1, y1, x1, y1, width=2, fill=self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-                        tup=[200,200]
-                        img.putpixel((int(x1), int(y1)), 1)
+                        img.putpixel((int(x1), int(y1)), self.colors)
                         x1 += dx
                         y1 += dy
             else:
                 #self.c.create_line(x1,y1,x2,y2)
-                img.putpixel((x1,y1), self.color)
+                img.putpixel((x1,y1), self.colors)
             lineImg = ImageTk.PhotoImage(img)
             return lineImg
     #Algoritmo Bresenham
-    def drawBresenham(self,x1,y1,x2,y2,):
-
-        m_new = 2 * (y2 - y1)
-        slope_error_new = m_new - (x2 - x1)
-
-        y=y1
-        for x in range(x1,x2+1):
-
-            self.c.create_line(x,y,x,y, width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-            # Add slope to increment angle formed
-            slope_error_new =slope_error_new + m_new
-
-            # Slope error reached limit, time to
-            # increment y and update slope error.
-            if (slope_error_new >= 0):
-                y=y+1
-                slope_error_new =slope_error_new - 2 * (x2 - x1)
-
+    def drawBresenham(self,x1,y1,x2,y2, img):
+        print("Bresenham's line algorithm")
+        dx = abs(x2 - x1)
+        dy = abs(y2 - y1)
+        x, y = x1, y1
+        sx = -1 if x1 > x2 else 1
+        sy = -1 if y1 > y2 else 1
+        if dx > dy:
+            err = dx / 2.0
+            while x != x2:
+                img.putpixel((x,y), self.colors)
+                err -= dy
+                if err < 0:
+                    y += sy
+                    err += dx
+                x += sx
+        else:
+            err = dy / 2.0
+            while y != y2:
+                img.putpixel((x,y), self.colors)
+                err -= dx
+                if err < 0:
+                    x += sx
+                    err += dy
+                y += sy        
+        img.putpixel((x,y), self.colors)      
+        lineImg = ImageTk.PhotoImage(img)
+        return lineImg
+        
 
 
     #Algoritmo Circulo DDA
     def drawCircleDDA(self,rad, cx, cy):
+        print("Circle Algorithm")
         rx= rad
         x= round(rx)
         y=0
@@ -424,11 +449,6 @@ class Paint(object):
             self.c.create_line(y+cemtroX  ,  -x+cemtroY  ,  y+cemtroX  ,  -x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
 
             self.c.create_line(-y+cemtroX  ,  -x+cemtroY  ,  -y+cemtroX  ,  -x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-            #Debugging
-
-            #print("x= %i" %x)
-            #print("y= %i"%y)
-            #end of debug
             rx= rx-y/rx
             x= round(rx)
             y=y+1
