@@ -226,13 +226,13 @@ class Paint(object):
 
                 self.points.clear()
 
-    def onClickLine():
+    def onClickLine(self):
         pass
 
-    def onMotionLine():
+    def onMotionLine(self):
         pass
 
-    def onReleaseLine():
+    def onReleaseLine(self):
         pass
 
 
@@ -424,7 +424,23 @@ class Paint(object):
         return lineImg
         
 
+    def circleputpixel(self, x, y, cemtroX, cemtroY):
+        self.c.create_line(x+cemtroX  ,  y+cemtroY  ,  x+cemtroX  ,  y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
 
+        self.c.create_line(y+cemtroX  ,  x+cemtroY  ,  y+cemtroX  ,  x+cemtroY, width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+
+        self.c.create_line(-x+cemtroX,  y+cemtroY  ,  -x+cemtroX  ,  y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+
+        self.c.create_line(x+cemtroX  ,  -y+cemtroY  ,  x+cemtroX  ,  -y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+
+        self.c.create_line(-x+cemtroX  ,  -y+cemtroY  ,  -x+cemtroX  ,  -y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+
+        self.c.create_line(-y+cemtroX  ,  x+cemtroY  ,  -y+cemtroX  ,  x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+
+        self.c.create_line(y+cemtroX  ,  -x+cemtroY  ,  y+cemtroX  ,  -x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+
+        self.c.create_line(-y+cemtroX  ,  -x+cemtroY  ,  -y+cemtroX  ,  -x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+        
     #Algoritmo Circulo DDA
     def drawCircleDDA(self,rad, cx, cy):
         print("Circle Algorithm")
@@ -434,26 +450,48 @@ class Paint(object):
         cemtroX=cx #Valor X de prueba del centro del circulo
         cemtroY=cy #Valor Y de prueba del centro del circulo
         while y<=x:
-            self.c.create_line(x+cemtroX  ,  y+cemtroY  ,  x+cemtroX  ,  y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-            self.c.create_line(y+cemtroX  ,  x+cemtroY  ,  y+cemtroX  ,  x+cemtroY, width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-            self.c.create_line(-x+cemtroX,  y+cemtroY  ,  -x+cemtroX  ,  y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-            self.c.create_line(x+cemtroX  ,  -y+cemtroY  ,  x+cemtroX  ,  -y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-            self.c.create_line(-x+cemtroX  ,  -y+cemtroY  ,  -x+cemtroX  ,  -y+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-            self.c.create_line(-y+cemtroX  ,  x+cemtroY  ,  -y+cemtroX  ,  x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-            self.c.create_line(y+cemtroX  ,  -x+cemtroY  ,  y+cemtroX  ,  -x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-
-            self.c.create_line(-y+cemtroX  ,  -x+cemtroY  ,  -y+cemtroX  ,  -x+cemtroY  , width=2, fill =self.color, capstyle=ROUND, smooth=TRUE, splinesteps=36)
+            self.circleputpixel(x,y, cemtroX, cemtroY)
             rx= rx-y/rx
             x= round(rx)
             y=y+1
         #print("fin")
+    
 
+        def eclipseMidPoint(centerPoint, rx, ry, color, img):
+            rxSq = rx ** 2
+            rySq = ry ** 2
+            x = 0
+            y = ry
+            px = 0
+            py = 2 * rxSq * y
+            drawEclipse(centerPoint, x, y, color, img)
+            p = rySq - (rxSq * ry) + (0.25 * rxSq)
+            while px < py:
+                x = x + 1
+                px = px + 2*rySq
+                if p < 0:
+                    p = p + rySq + px
+                else:
+                    y = y - 1
+                    py = py - 2*rxSq
+                    p = p + rySq + px - py
+                drawEclipse(centerPoint, x, y, color, img)
+
+            p = rySq*(x+0.5)*(x+0.5) + rxSq*(y-1)*(y-1) - rxSq*rySq
+            while y > 0:
+                y = y - 1
+                py = py - 2 * rxSq;
+                if p > 0:
+                    p = p + rxSq - py;
+                else:
+                    x = x + 1
+                    px = px + 2 * rySq;
+                    p = p + rxSq - py + px;
+                drawEclipse(centerPoint, x, y, color, img);
+
+            eclipseImg = ImageTk.PhotoImage(img)
+            return eclipseImg
+    
     #Para saber las coordenadas del cursor en el canvas
     def canxy(self, event):
         self.root.title(" Algoritmos ( %i , %i)" %(event.x, event.y))
