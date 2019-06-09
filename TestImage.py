@@ -7,16 +7,10 @@ from PIL import Image, ImageTk, ImageDraw, ImageColor
 
 
 class Paint(object):
-    red = (255,0,0)
+    
     dark = (0,0,0)
-    green = (0, 255, 0)
-    yellow = (255, 204, 0)
-    orange = (255, 102, 0)
     white = (255,255, 255)
-    pink = (255, 186, 210)
-    blueLight = (0, 153, 204)
-    blueMalibu = (102, 204, 255)
-    purple = (102, 0, 204)  
+    
     colors=dark 
     bc=white   
     DEFAULT_PEN_SIZE = 5.0
@@ -248,8 +242,7 @@ class Paint(object):
  
     #Algoritmo Bresenham
     def Bresenham(self):
-        #self.activate_button(self.brush_button)
-        #self.res=self.t.get()
+     
         self.line_DDA=False
         self.label1.config(text="Bresenham")
         self.activate_button(self.Bresenham_button)
@@ -260,17 +253,13 @@ class Paint(object):
 
     #Funcion Circulo
     def circulo(self):
-        #cx= int(self.cx.get())
-        #cy= int(self.cy.get())
         self.activate_button(self.circulo_button)
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onMotionCircle)
         self.c.bind("<ButtonRelease-1>", self.onReleaseCircle)
         self.circle=True
         self.rad=float(self.cir.get())
-        #self.circleImg=self.drawCircleDDA(self.rad, cx, cy,self.paper)
-        #self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
-
+       
     #Funcion elipse
     def elipse(self):
         self.activate_button(self.elipse_button)
@@ -280,9 +269,6 @@ class Paint(object):
         self.circle=False
         
         
-        #self.elipseImg=self.drawElipse(cx,cy,self.radX, self.radY, self.colors, self.paper)
-        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.elipseImg)
-
 
 
     #Funcion Triangulo
