@@ -1,6 +1,7 @@
 import math
 from tkinter import *
 from tkinter.colorchooser import askcolor
+from tkinter import filedialog
 import math
 import copy
 from PIL import Image, ImageTk, ImageDraw, ImageColor
@@ -32,6 +33,16 @@ class Paint(object):
         self.root = Tk()
         #Titulo de la ventana
         self.root.title("Algoritmos")
+        menubar = Menu(self.root)
+        fileMenu = Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=fileMenu)
+        fileMenu.add_command(label="New", command=self.clearCanvas)
+        fileMenu.add_command(label="Open", command=self.callOpenImage)
+        fileMenu.add_command(label="Save", command=self.callSaveImage)
+        fileMenu.add_command(label="Save as...", command=self.callSaveAsImage)
+        fileMenu.add_command(label="Exit", command=self.root.quit)
+        self.root.config(menu=menubar)
+        
 
         #Los botones
         #Boton Lapiz, vino de base.
@@ -103,33 +114,9 @@ class Paint(object):
         self.c.grid(row=8, columnspan=28)
 
 
-        
-
-        #Entrada de Datos Circulo
-        self.cir=Entry(self.root)
-        self.cir.grid(row=1, column=8)
-
-        self.cx=Entry(self.root)
-        self.cx.grid(row=2, column=8)
-
-        self.cy=Entry(self.root)
-        self.cy.grid(row=3, column=8)
-
-        self.ry=Entry(self.root)
-        self.ry.grid(row=1, column=20)
-
        
 
-        
-
-        #Los Labels del Circulo
-        Label(self.root, text="Radio").grid(row=1, column=7)
-        Label(self.root, text="Centro x").grid(row=2, column=7)
-        Label(self.root, text="Centro y").grid(row=3, column=7)
-
-        #Label
-        self.label1=Label(self.root, text="DDA")
-        self.label1.grid(row=1, column=18)
+    
 
         self.bgcolor="white"
         self.paper = Image.new("RGB", (self.paperWidht,self.paperHeight), self.bgcolor)
@@ -143,9 +130,36 @@ class Paint(object):
 
 
     #Funcion para iniciar datos, vino con el codigo base pero decidi aprovecharlo
-                       
+    def callOpenImage(self):
+        self.fOpenName = filedialog.askopenfilename(filetypes=(("Supported Image Files", "*.jpg; *.jpeg; *.png; *.bmp; *.ico"),
+                                        ("All files", "*.*") )) 
+        if not self.fOpenName:
+            return
+        self.c.delete("all")
+
+        self.paper = Image.open(self.fOpenName).resize((self.paperWidht,self.paperHeight))
+        self.usePaper = ImageTk.PhotoImage(self.paper)
+
+        self.c.img = self.usePaper
+        self.c.create_image(self.paperWidht/2, self.paperHeight/2 , image=self.c.img)
+
+    def callSaveImage(self):
+        if self.fOpenName != None:
+            self.paper.save(self.fOpenName)
+            return
+
+        fname = filedialog.asksaveasfilename(defaultextension=".png")
+        if not fname: # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        self.paper.save(fname)
+
+    def callSaveAsImage(self):
+        fname = filedialog.asksaveasfilename(defaultextension=".png")
+        if not fname: # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        self.paper.save(fname)
     def setup(self):
-    
+       
         self.old_x = None
         self.old_y = None
         self.line_width = self.choose_size_button.get()
@@ -237,14 +251,14 @@ class Paint(object):
         self.c.bind("<B1-Motion>", self.onMotionLine)
         self.c.bind("<ButtonRelease-1>", self.onReleaseLine)
         #self.lapiz_on=False
-        self.label1.config(text="DDA")
+        #self.label1.config(text="DDA")
   
  
     #Algoritmo Bresenham
     def Bresenham(self):
      
         self.line_DDA=False
-        self.label1.config(text="Bresenham")
+        #self.label1.config(text="Bresenham")
         self.activate_button(self.Bresenham_button)
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onMotionLine)
@@ -258,7 +272,7 @@ class Paint(object):
         self.c.bind("<B1-Motion>", self.onMotionCircle)
         self.c.bind("<ButtonRelease-1>", self.onReleaseCircle)
         self.circle=True
-        self.rad=float(self.cir.get())
+        
        
     #Funcion elipse
     def elipse(self):
@@ -581,11 +595,25 @@ class Paint(object):
         #self.activate_button(self.eraser_button, eraser_mode=True)
 
     def eraser_motion(self,event):
+        print("Borro")
         size = self.choose_size_button.get()
-        self.c.create_line(self.x, self.y, event.x, event.y, width=size, fill="white")
+        puntos=(self.x, self.y, event.x, event.y)
+        #self.c.create_line(self.x, self.y, event.x, event.y, width=size, fill="white")
+        self.img=self.eraser(puntos, size, self.paper)
         self.x, self.y = event.x, event.y
-
-
+        self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.img)
+        
+    
+    def eraser_release(self, event):
+        lol=ImageTk.PhotoImage(self.paper)
+        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=lol)
+    
+    def eraser(self, puntos, size, img):
+        draw=ImageDraw.Draw(img)
+        draw.line((puntos), fill=self.white, width=size)
+        imagen=ImageTk.PhotoImage(img)
+        return imagen
+        
     #Le da efecto de boton seleccionado
     def activate_button(self, some_button, eraser_mode=False):
         self.active_button.config(relief=RAISED)
