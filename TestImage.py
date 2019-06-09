@@ -92,7 +92,7 @@ class Paint(object):
 
         #Resto de botones que vinieron con el codigo
         self.color_button = Button(self.root, text='color', command=self.choose_color)
-        self.color_button.grid(row=0, column=25)
+        self.color_button.grid(row=0, column=13)
 
         
         self.eraser_button = Button(self.root, text='eraser', command=self.use_eraser)
@@ -165,8 +165,9 @@ class Paint(object):
         self.c.configure(cursor="crosshair")
         self.active_button = self.pen_button
         self.activate_button(self.pen_button)
-        #self.c.bind('<B1-Motion>', self.paint)
-        #self.c.bind('<ButtonRelease-1>', self.reset)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onPencilDraw)
+        self.c.bind("<ButtonRelease-1>", self.onPencilDraw)
         self.c.bind("<Motion>", self.canxy)
 
 
@@ -200,6 +201,25 @@ class Paint(object):
        
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.lineImg)
 
+    def onMotionCircle(self, event):
+        x1,y1 =self.x, self.y
+        x2, y2 = event.x, event.y
+        paper=copy.copy(self.paper)
+        radio= int(abs((x2+x1)/2-x2))
+        cx=int((x2+x1)/2)
+        cy=int((y2+y1)/2)
+        self.circleImg=self.drawCircleDDA(radio, cx, cy, paper)
+        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
+
+    def onReleaseCircle(self, event):
+        x1,y1 =self.x, self.y
+        x2, y2 = event.x, event.y
+        radio= int(abs((x2+x1)/2-x2))
+        cx=int((x2+x1)/2)
+        cy=int((y2+y1)/2)
+        self.circleImg=self.drawCircleDDA(radio, cx, cy, self.paper)
+        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
+
 
     #Corre Algoritmo DDA
     def dda(self):
@@ -226,13 +246,17 @@ class Paint(object):
 
     #Funcion Circulo
     def circulo(self):
-        cx= int(self.cx.get())
-        cy= int(self.cy.get())
+        #cx= int(self.cx.get())
+        #cy= int(self.cy.get())
+        self.activate_button(self.circulo_button)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onMotionCircle)
+        self.c.bind("<ButtonRelease-1>", self.onReleaseCircle)
         self.circle=True
         self.line_DDA=False
         self.rad=float(self.cir.get())
-        self.circleImg=self.drawCircleDDA(self.rad, cx, cy,self.paper)
-        self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
+        #self.circleImg=self.drawCircleDDA(self.rad, cx, cy,self.paper)
+        #self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
 
     #Funcion elipse
     def elipse(self):
@@ -244,6 +268,9 @@ class Paint(object):
         self.radY=float(self.ry.get())
         self.elipseImg=self.drawElipse(cx,cy,self.radX, self.radY, self.colors, self.paper)
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.elipseImg)
+
+
+
     #Funcion Triangulo
     def triangulo(self):
         self.activate_button(self.triang_button)
@@ -540,7 +567,8 @@ class Paint(object):
     #Escoger Color
     def choose_color(self):
         self.eraser_on = False
-        self.color = askcolor(color=self.color)[1]
+        self.color = askcolor()[0]
+        self.colors=(int(self.color[0]), int(self.color[1]), int(self.color[2]))
 
     #Activa Borrador
     def use_eraser(self):
@@ -754,13 +782,14 @@ class Paint(object):
         pencilImg = ImageTk.PhotoImage(img)
         return pencilImg
 
-    def on_button_draw_pencil(self, event):
-        previousPoint = (self.old_x, self.old_y)
-        pointNow = (event.x, event.y)
-        self.pencilImg = self.pencil(previousPoint, pointNow, self.color, self.paper)
+    def onPencilDraw(self, event):
+        
+        #self.pencilImg = self.pencil(previousPoint, pointNow, self.color, self.paper)
+        self.drawDDA(self.x, self.y, event.x, event.y, self.paper)
+        self.pencilImg=ImageTk.PhotoImage(self.paper)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.pencilImg)
-        self.old_x = event.x
-        self.old_y = event.y
+        self.x = event.x
+        self.y = event.y
 
     #Accion del boton Lapiz
     def use_pen(self):
@@ -769,8 +798,8 @@ class Paint(object):
         self.line=False
         self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
-        self.c.bind("<B1-Motion>", self.on_button_draw_pencil)
-        self.c.bind("<ButtonRelease-1>", self.on_button_draw_pencil)
+        self.c.bind("<B1-Motion>", self.onPencilDraw)
+        self.c.bind("<ButtonRelease-1>", self.onPencilDraw)
 
     def nothing(self,event):
         pass
