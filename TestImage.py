@@ -8,14 +8,29 @@ from PIL import Image, ImageTk, ImageDraw, ImageColor
 
 
 class Paint(object):
-    
+    #Declaracion de directorio de los iconos
+    DDAIcon='./icon/lineaDDA.png'
+    BreseIcon='./icon/lineaBre.png'
+    LapizIcon='./icon/pencil-tool.png'
+    CircleIcon='./icon/circle-outline.png'
+    ElipseIcon='./icon/elipse.png'
+    TriaIcon='./icon/triangle.png'
+    RectIcon='./icon/rectangle.png'
+    FillIcon='./icon/fill.png'
+    TransIcon='./icon/translate.png'
+    ScaleIcon='./icon/scale.png'
+    RotateIcon='./icon/rotation.png'
+    EraserIcon='./icon/eraser.png'
+    ColorIcon='./icon/pantone.png'
+    ClearIcon='./icon/whitePage.png'
+
     dark = (0,0,0)
     white = (255,255, 255)
     
     colors=dark 
     bc=white   
-    DEFAULT_PEN_SIZE = 5.0
-    DEFAULT_COLOR = 'black'
+
+    
     x=0
     y=0
     xf=0
@@ -43,75 +58,98 @@ class Paint(object):
         fileMenu.add_command(label="Exit", command=self.root.quit)
         self.root.config(menu=menubar)
         
+        self.iconDDA=PhotoImage(file=self.DDAIcon)
+        self.iconBre=PhotoImage(file=self.BreseIcon)
+        self.iconPencil=PhotoImage(file=self.LapizIcon)
+        self.iconCircle=PhotoImage(file=self.CircleIcon)
+        self.iconElipse=PhotoImage(file=self.ElipseIcon)
+        self.iconTria=PhotoImage(file=self.TriaIcon)
+        self.iconRect=PhotoImage(file=self.RectIcon)
+        self.iconFill=PhotoImage(file=self.FillIcon)
+        self.iconTrans=PhotoImage(file=self.TransIcon)
+        self.iconScale=PhotoImage(file=self.ScaleIcon)
+        self.iconRotate=PhotoImage(file=self.RotateIcon)
+        self.iconEraser=PhotoImage(file=self.EraserIcon)
+        self.iconColor=PhotoImage(file=self.ColorIcon)
+        self.iconClear=PhotoImage(file=self.ClearIcon)
 
         #Los botones
-        #Boton Lapiz, vino de base.
-        self.pen_button = Button(self.root, text='lapiz', command=self.use_pen)
-        self.pen_button.grid(row=0, column=16)
-
-        #Boton DDA
-        self.clear_button = Button(self.root, text='Limpiar', command=self.clearCanvas)
-        self.clear_button.grid(row=0, column=1)
-
-        #Boton DDA
-        self.brush_button = Button(self.root, text='DDA', command=self.dda)
-        self.brush_button.grid(row=4, column=1)
-
-        #Boton Circulo
-        self.circulo_button = Button(self.root, text="Circulo", command= self.circulo)
-        self.circulo_button.grid(row= 0, column= 8)
-
-        #Boton Triangulo
-        self.triang_button = Button(self.root, text='Triangulo', command=self.triangulo)
-        self.triang_button.grid(row=0, column=3)
-
-        #Boton Bresenham
-        self.Bresenham_button = Button(self.root, text='Bresenham', command=self.Bresenham)
-        self.Bresenham_button.grid(row=0, column=2)
-
-        #Boton box
-        self.Box_button = Button(self.root, text = 'Box', command= self.box)
-        self.Box_button.grid(row=0, column=12)
-
-        #Boton Rotacion
-        self.rotate_button = Button(self.root, text='Rotacion', command=self.rotationTool)
-        self.rotate_button.grid(row=0, column=18)
-
-        #Boton Elipse
-        self.elipse_button = Button(self.root, text="Elipse", command= self.elipse)
-        self.elipse_button.grid(row=0, column=20)    
-
-        #Boton Relleno
-        self.fill_button = Button (self.root, text="Relleno", command=self.fill)
-        self.fill_button.grid(row=0, column=24)
-
-
-        #Boton Translacion
-        self.transi_button = Button (self.root, text="Translacion", command=self.transitionTool)
-        self.transi_button.grid(row=0, column=22)
         
-        #Boton Escala
-        self.scale_button = Button(self.root, text='Escalado', command=self.scalingTool)
-        self.scale_button.grid(row=0, column=5)
+        #Botones de la primera fila
+        #Boton Limpiar Canvas
+        self.clear_button = Button(self.root, text='Limpiar', image=self.iconClear, width="30", height="30",command=self.clearCanvas)
+        self.clear_button.grid(row=1, column=10)
 
 
-        #Resto de botones que vinieron con el codigo
-        self.color_button = Button(self.root, text='color', command=self.choose_color)
-        self.color_button.grid(row=0, column=13)
+         #Resto de botones que vinieron con el codigo
+        self.color_button = Button(self.root, text='color', image=self.iconColor, width="30", height="30", command=self.choose_color)
+        self.color_button.grid(row=1, column=9)
 
         
-        self.eraser_button = Button(self.root, text='eraser', command=self.use_eraser)
-        self.eraser_button.grid(row=0, column=23)
+        self.eraser_button = Button(self.root, text='eraser', image=self.iconEraser,width="30", height="30",command=self.use_eraser)
+        self.eraser_button.grid(row=1, column=11)
 
 
 
         self.choose_size_button = Scale(self.root, from_=1, to=100, orient=HORIZONTAL)
-        self.choose_size_button.grid(row=0, column=25)
+        self.choose_size_button.grid(row=1, column=12)
+
+        #Botones de la segunda fila
+
+        #Boton Lapiz, vino de base.
+        self.pen_button = Button(self.root, text='lapiz', image=self.iconPencil,width="30", height="30",command=self.use_pen)
+        self.pen_button.grid(row=1, column=0)
+
+        #Boton DDA
+        self.brush_button = Button(self.root, text='DDA', image=self.iconDDA,width="30", height="30", command=self.dda)
+        self.brush_button.grid(row=1, column=1)
+
+        #Boton Bresenham
+        self.Bresenham_button = Button(self.root, text='Bresenham',image=self.iconBre,width="30", height="30", command=self.Bresenham)
+        self.Bresenham_button.grid(row=1, column=2)
+        
+
+        #Boton Triangulo
+        self.triang_button = Button(self.root, text='Triangulo', image=self.iconTria,width="30", height="30",command=self.triangulo)
+        self.triang_button.grid(row=1, column=3)
+
+        #Boton box
+        self.Box_button = Button(self.root, text = 'Box', image=self.iconRect,width="30", height="30", command= self.box)
+        self.Box_button.grid(row=1, column=4)
+
+        #Boton Circulo
+        self.circulo_button = Button(self.root, text="Circulo", image=self.iconCircle,width="30", height="30", command= self.circulo)
+        self.circulo_button.grid(row= 1, column= 5)
+
+        #Boton Elipse
+        self.elipse_button = Button(self.root, text="Elipse", image=self.iconElipse,width="30", height="30",command= self.elipse)
+        self.elipse_button.grid(row=1, column=6) 
+
+        #Boton Relleno
+        self.fill_button = Button (self.root, text="Relleno", image=self.iconFill,width="30", height="30",command=self.fill)
+        self.fill_button.grid(row=1, column=20)
+
+        #Boton Translacion
+        self.transi_button = Button (self.root, text="Translacion",image=self.iconTrans,width="30", height="30", command=self.transitionTool)
+        self.transi_button.grid(row=1, column=21)
+
+        #Boton Escala
+        self.scale_button = Button(self.root, text='Escalado', image=self.iconScale,width="30", height="30", command=self.scalingTool)
+        self.scale_button.grid(row=1, column=22)
+
+        
+
+        #Boton Rotacion
+        self.rotate_button = Button(self.root, text='Rotacion', image=self.iconRotate, width="30", height="30", command=self.rotationTool)
+        self.rotate_button.grid(row=1, column=23)
+
+
+       
 
 
         #El Canvas
         self.c = Canvas(self.root, bg='white', width=self.paperWidht, height=self.paperHeight)
-        self.c.grid(row=8, columnspan=28)
+        self.c.grid(row=8, columnspan=24)
 
 
        
@@ -128,7 +166,7 @@ class Paint(object):
         #Parte del codigo de la ventana grafica.
         self.root.mainloop()
 
-
+   
     #Funcion para iniciar datos, vino con el codigo base pero decidi aprovecharlo
     def callOpenImage(self):
         self.fOpenName = filedialog.askopenfilename(filetypes=(("Supported Image Files", "*.jpg; *.jpeg; *.png; *.bmp; *.ico"),
@@ -247,6 +285,7 @@ class Paint(object):
     def dda(self):
         self.line_DDA=True
         self.activate_button(self.brush_button)
+        self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onMotionLine)
         self.c.bind("<ButtonRelease-1>", self.onReleaseLine)
@@ -259,6 +298,7 @@ class Paint(object):
      
         self.line_DDA=False
         #self.label1.config(text="Bresenham")
+        self.c.configure(cursor="crosshair")
         self.activate_button(self.Bresenham_button)
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onMotionLine)
@@ -268,6 +308,7 @@ class Paint(object):
     #Funcion Circulo
     def circulo(self):
         self.activate_button(self.circulo_button)
+        self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onMotionCircle)
         self.c.bind("<ButtonRelease-1>", self.onReleaseCircle)
@@ -277,6 +318,7 @@ class Paint(object):
     #Funcion elipse
     def elipse(self):
         self.activate_button(self.elipse_button)
+        self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onMotionCircle)
         self.c.bind("<ButtonRelease-1>", self.onReleaseCircle)
@@ -288,6 +330,7 @@ class Paint(object):
     #Funcion Triangulo
     def triangulo(self):
         self.activate_button(self.triang_button)
+        self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onTrianguloMotion)
         self.c.bind("<ButtonRelease-1>", self.onTrianguloRelease)
@@ -318,6 +361,7 @@ class Paint(object):
 
     def box(self):
         self.activate_button(self.Box_button)
+        self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onBoxMotion)
         self.c.bind("<ButtonRelease-1>", self.onBoxRelease)
@@ -350,6 +394,7 @@ class Paint(object):
     #Funcion relleno
     def fill(self):
         self.activate_button(self.fill_button)
+        self.c.configure(cursor="spraycan")
         self.c.bind("<ButtonPress-1>", self.fillColors)
         self.c.bind("<B1-Motion>", self.nothing)
         self.c.bind("<ButtonRelease-1>", self.release)
@@ -362,6 +407,7 @@ class Paint(object):
         self.traslate=True
         self.rotate=False
         self.scale=False
+        self.c.configure(cursor="crosshair")
         self.c.config(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onChoosingMotion)
@@ -374,6 +420,7 @@ class Paint(object):
         self.rotate=True
         self.traslate=False
         self.scale=False
+        self.c.configure(cursor="crosshair")
         self.c.config(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onChoosingMotion)
@@ -384,6 +431,7 @@ class Paint(object):
         self.scale=True
         self.rotate=False
         self.traslate=False
+        self.c.configure(cursor="crosshair")
         self.c.config(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onChoosingMotion)
@@ -587,6 +635,7 @@ class Paint(object):
     #Activa Borrador
     def use_eraser(self):
         self.activate_button(self.eraser_button)
+        self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.eraser_motion)
         self.c.bind("<ButtonRelease-1>", self.eraser_motion)
@@ -836,6 +885,7 @@ class Paint(object):
         self.lapiz_on=True
         self.line=False
         self.c.configure(cursor="crosshair")
+        print('Icono de cursor obtenido de: "https://www.freepik.com/?__hstc=57440181.dfb3ad532d753cdc1cb7d881068f2af0.1560116626434.1560116626434.1560116626434.1&__hssc=57440181.2.1560116626435&__hsfp=2958300247" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0')
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onPencilDraw)
         self.c.bind("<ButtonRelease-1>", self.onPencilDraw)
