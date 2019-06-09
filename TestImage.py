@@ -572,7 +572,18 @@ class Paint(object):
 
     #Activa Borrador
     def use_eraser(self):
-        self.activate_button(self.eraser_button, eraser_mode=True)
+        self.activate_button(self.eraser_button)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.eraser_motion)
+        self.c.bind("<ButtonRelease-1>", self.eraser_motion)
+        
+        
+        #self.activate_button(self.eraser_button, eraser_mode=True)
+
+    def eraser_motion(self,event):
+        size = self.choose_size_button.get()
+        self.c.create_line(self.x, self.y, event.x, event.y, width=size, fill="white")
+        self.x, self.y = event.x, event.y
 
 
     #Le da efecto de boton seleccionado
