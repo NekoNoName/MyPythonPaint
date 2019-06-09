@@ -24,7 +24,7 @@ class Paint(object):
     y=0
     xf=0
     yf=0
-    points=[]
+    
     pixelList=[]
     clicks=0
     paperWidht=1024
@@ -44,9 +44,6 @@ class Paint(object):
         #Boton DDA
         self.brush_button = Button(self.root, text='DDA', command=self.dda)
         self.brush_button.grid(row=4, column=1)
-        #Boton Borrar entrada DDA
-        self.clearDDA_button = Button(self.root, text='Borrar', command=self.borrarDDA)
-        self.clearDDA_button.grid(row=4, column=0)
 
         #Boton Circulo
         self.circulo_button = Button(self.root, text="Circulo", command= self.circulo)
@@ -100,19 +97,7 @@ class Paint(object):
         self.c.grid(row=8, columnspan=28)
 
 
-        #Entrada de Datos DDA y Bresenham
-        self.t= Entry(self.root)
-        self.t.grid(row=0, column=1)
-
-        self.t2= Entry(self.root)
-        self.t2.grid(row=1, column=1)
-
-        self.t3= Entry(self.root)
-        self.t3.grid(row=2, column=1)
-
-
-        self.t4= Entry(self.root)
-        self.t4.grid(row=3, column=1)
+        
 
         #Entrada de Datos Circulo
         self.cir=Entry(self.root)
@@ -146,11 +131,7 @@ class Paint(object):
         self.tr6= Entry(self.root)
         self.tr6.grid(row=2, column=6)
 
-        #Los Labels DDA
-        Label(self.root, text="X").grid(row=0, column=0)
-        Label(self.root, text="Y").grid(row=1, column=0)
-        Label(self.root, text="Xf").grid(row=2, column=0)
-        Label(self.root, text="Yf").grid(row=3, column=0)
+        
 
         #Los Labels Triangulo
         Label(self.root, text="X1").grid(row=1, column=3)
@@ -211,40 +192,11 @@ class Paint(object):
         self.lapiz_on=False
         self.line=True
         self.c.configure(cursor="cross")
-        self.c.bind("<Button-1>", self.point)
+      
 
 
     #Accion de la funcion linea, lee la posicion del click y crea la linea si es el segundo click
-    def point(self, event):
-        if self.line:
-            self.points.append(event.x)
-            self.points.append(event.y)
-            self.clicks+=1
-            self.c.create_line(event.x, event.y, event.x, event.y, width=2, fill=self.color,
-                                   capstyle=ROUND, smooth=TRUE, splinesteps=36)
-            if self.clicks>=2:
-
-                self.clicks=0
-                pointx=self.points[0]
-                pointy=self.points[1]
-                pointxf=self.points[2]
-                pointyf=self.points[3]
-                if self.line_DDA:
-                    papel=copy.copy(self.paper)
-                    self.lineImg=self.drawDDA(pointx, pointy, pointxf, pointyf, self.paper)
-                    self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
-
-                else:
-                    self.lineImg=self.drawBresenham(pointx, pointy, pointxf, pointyf, self.paper)
-                    self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
-
-                if self.circle:
-                    dx=self.points[2]-self.points[0]
-                    dy=self.points[3]-self.points[1]
-                    leng=math.sqrt(dx**2+dy**2)
-                    self.circleImg=self.drawCircleDDA(leng, self.points[0], self.points[1], self.paper)
-                    self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
-                self.points.clear()
+    
 
     def onClickPress(self, event):
         self.x, self.y = event.x, event.y
@@ -253,77 +205,45 @@ class Paint(object):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
         paper=copy.copy(self.paper)
-        self.lineImg=self.drawDDA(x1,y1,x2,y2, paper)
+        if self.line_DDA:
+            self.lineImg=self.drawDDA(x1,y1,x2,y2, paper)
+        else:
+            self.lineImg=self.drawBresenham(x1,y1,x2,y2,paper)
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.lineImg)
 
     def onReleaseLine(self, event):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
-        
-        self.lineImg=self.drawDDA(x1,y1,x2,y2, self.paper)
+        if self.line_DDA:
+            self.lineImg=self.drawDDA(x1,y1,x2,y2, self.paper)
+        else:
+            self.lineImg=self.drawBresenham(x1,y1,x2,y2,self.paper)
+       
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.lineImg)
 
 
     #Corre Algoritmo DDA
     def dda(self):
+        self.line_DDA=True
         self.activate_button(self.brush_button)
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onMotionLine)
         self.c.bind("<ButtonRelease-1>", self.onReleaseLine)
         #self.lapiz_on=False
         self.label1.config(text="DDA")
-        self.line_DDA=True
-        if (not self.t.index(END)==0) and (not self.t2.index(END)==0) and not self.t3.index(END)==0 and not self.t4.index(END)==0:
-            #Adquiere x inicial
-            self.x=int(self.t.get())
-
-            #Adquiere y inicial
-            self.y=int(self.t2.get())
-
-            #Adquiere x final
-            self.xf=int(self.t3.get())
-
-            #Adquiere y final
-            self.yf=int(self.t4.get())
-
-            #Dibuja la linea
-            papel=copy.copy(self.paper)
-            self.lineImg=self.drawDDA(self.x,self.y,self.xf,self.yf,self.paper)
-            self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
-
-
-
-    #Para borrar los campos de entrada
-    def borrarDDA(self):
-        self.t.delete(0, END)
-        self.t2.delete(0, END)
-        self.t3.delete(0, END)
-        self.t4.delete(0, END)
-
-
+  
+ 
     #Algoritmo Bresenham
     def Bresenham(self):
         #self.activate_button(self.brush_button)
         #self.res=self.t.get()
         self.line_DDA=False
         self.label1.config(text="Bresenham")
-
-        if (not self.t.index(END)==0) and (not self.t2.index(END)==0) and not self.t3.index(END)==0 and not self.t4.index(END)==0:
-
-            self.x=int(self.t.get())
-
-
-            self.y=int(self.t2.get())
-
-
-            self.xf=int(self.t3.get())
-
-
-            self.yf=int(self.t4.get())
-
-
-            self.lineImg=self.drawBresenham(self.x,self.y,self.xf,self.yf, self.paper)
-            self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
+        self.activate_button(self.Bresenham_button)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onMotionLine)
+        self.c.bind("<ButtonRelease-1>", self.onReleaseLine)
+    
 
     #Funcion Circulo
     def circulo(self):
@@ -347,24 +267,53 @@ class Paint(object):
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.elipseImg)
     #Funcion Triangulo
     def triangulo(self):
-        x1=int(self.tr.get())
-        y1=int(self.tr2.get())
-        x2=int(self.tr3.get())
-        y2=int(self.tr4.get())
-        x3=int(self.tr5.get())
-        y3=int(self.tr6.get())
-        self.lineImg=self.drawDDA(x1,y1,x2,y2,self.paper)
+        self.activate_button(self.triang_button)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onTrianguloMotion)
+        self.c.bind("<ButtonRelease-1>", self.onTrianguloRelease)
+        
+    def drawTriangulo(self, x1,y1,x2,y2,x3,y3, img):    
+        self.lineImg=self.drawDDA(x1,y1,x2,y2,img)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
-        self.lineImg2=self.drawDDA(x2,y2,x3,y3, self.paper)
+        self.lineImg2=self.drawDDA(x2,y2,x3,y3, img)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg2)
-        self.lineImg3=self.drawDDA(x1,y1,x3,y3, self.paper)
+        self.lineImg3=self.drawDDA(x1,y1,x3,y3, img)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg3)
+    
+    def onTrianguloMotion(self, event):
+        x1,y1=int(self.x), int(self.y)
+        x2,y2=x1, int(event.y)
+        x3=int(x2+x1/2)
+        y3=y2 
+        paper=copy.copy(self.paper)
+        self.drawTriangulo(x1,y1,x2,y2,x3,y3,paper)
+    
+    def onTrianguloRelease(self, event):
+        x1,y1=int(self.x), int(self.y)
+        x2,y2=x1, int(event.y)
+        x3=int(x2+x1/2)
+        y3=y2 
+        self.drawTriangulo(x1,y1,x2,y2,x3,y3,self.paper)
+        
+
     def box(self):
-        x1=int(self.t.get())
-        y1=int(self.t2.get())
-        x2=int(self.t3.get())
-        y2=int(self.t4.get())
-        self.drawBox(x1,y1,x2,y2,self.paper)
+        self.activate_button(self.Box_button)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onBoxMotion)
+        self.c.bind("<ButtonRelease-1>", self.onBoxRelease)
+        
+
+    def onBoxMotion(self, event):
+        x1,y1=self.x, self.y
+        x2,y2=event.x, event.y
+        paper=copy.copy(self.paper)
+        self.drawBox(x1,y1,x2,y2,paper)
+
+    def onBoxRelease(self, event):
+        x1,y1=self.x, self.y
+        x2,y2=event.x, event.y
+        self.drawBox(x1,y1,x2,y2,self.paper)   
+
 
     #Funcion Box
     def drawBox(self,x1,y1,x2,y2, img):
@@ -407,10 +356,10 @@ class Paint(object):
         self.transitionPlace = ((x0, y0), (x1, y1))
         self.c.config(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.on_button_press)
-        self.c.bind("<B1-Motion>", self.on_button_transition_motion)
-        self.c.bind("<ButtonRelease-1>", self.on_button_release_transition)
+        self.c.bind("<B1-Motion>", self.onTransitionMotion)
+        self.c.bind("<ButtonRelease-1>", self.onTransitionRelease)
         
-    def on_button_transition_motion(self, event):
+    def onTransitionMotion(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
 
@@ -422,7 +371,7 @@ class Paint(object):
         self.transitImg = self.moveTransition(self.pixelList, (x1, y1), bg, paper)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.transitImg)
 
-    def on_button_release_transition(self, event):
+    def onTransitionRelease(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
         bg=(255,255,255)
