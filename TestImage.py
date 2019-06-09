@@ -29,6 +29,7 @@ class Paint(object):
     rotate=False
     traslate=False
     pixelList=[]
+    points=[]
     clicks=0
     paperWidht=1024
     paperHeight=720
@@ -43,6 +44,9 @@ class Paint(object):
         self.pen_button = Button(self.root, text='lapiz', command=self.use_pen)
         self.pen_button.grid(row=0, column=16)
 
+        #Boton DDA
+        self.clear_button = Button(self.root, text='Limpiar', command=self.clearCanvas)
+        self.clear_button.grid(row=0, column=1)
 
         #Boton DDA
         self.brush_button = Button(self.root, text='DDA', command=self.dda)
@@ -169,6 +173,9 @@ class Paint(object):
 
     #Accion de la funcion linea, lee la posicion del click y crea la linea si es el segundo click
     
+    def clearCanvas(self):
+        self.c.delete("all")
+        self.paper = Image.new("RGB", (self.paperWidht,self.paperHeight), self.bgcolor)
 
     def onClickPress(self, event):
         self.x, self.y = event.x, event.y
@@ -303,6 +310,7 @@ class Paint(object):
     def fill(self):
         self.activate_button(self.fill_button)
         self.c.bind("<ButtonPress-1>", self.fillColors)
+        self.c.bind("<B1-Motion>", self.nothing)
         self.c.bind("<ButtonRelease-1>", self.release)
 
     def release(self, event):
@@ -362,8 +370,8 @@ class Paint(object):
             self.c.bind("<ButtonRelease-1>", self.onScaleRelease)    
         if self.rotate:
             self.c.bind("<ButtonPress-1>", self.onClickPress)
-            self.c.bind("<B1-Motion>", self.onRotationMotion)
-            self.c.bind("<ButtonRelease-1>", self.onRotateScale)
+            self.c.bind("<B1-Motion>", self.onRotateMotion)
+            self.c.bind("<ButtonRelease-1>", self.onRotateRelease)
 
 
     def onTransitionMotion(self, event):
@@ -390,6 +398,45 @@ class Paint(object):
 
         self.pixelList = None
         self.transitionTool()
+
+    def onRotateMotion(self, event):
+        x0,y0 = (self.x, self.y)
+        x1,y1 = (event.x, event.y)
+
+        paper = copy.copy(self.paper)
+
+        if x1 > x0:
+            alpha = math.atan((y0-y1) / float(x0-x1))
+        else:
+            alpha = math.pi + math.atan((y0-y1) / float(x0-x1))
+
+        print (alpha)
+
+        if not self.pixelList:
+            self.pixelList = self.cropping(self.transitionPlace[0], self.transitionPlace[1], self.bc, paper)
+
+        self.rotateImg = self.moveRotation(self.pixelList, (x0, y0), alpha, self.bc, paper)
+        self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.rotateImg)
+
+    def onRotateRelease(self, event):
+        x0,y0 = (self.x, self.y)
+        x1,y1 = (event.x, event.y)
+        alpha = math.atan(y1 / float(x1))
+
+        if x1 > x0:
+            alpha = math.atan((y0-y1) / float(x0-x1))
+        else:
+            alpha = math.pi + math.atan((y0-y1) / float(x0-x1))
+
+        if self.pixelList:
+            self.eraseSelectedCropping(self.pixelList, self.bc, self.paper)
+
+        self.rotateImg = self.moveRotation(self.pixelList, (x0, y0), alpha, self.bc, self.paper)
+        self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.rotateImg)
+
+        self.rotationTool()
+        self.pixelList = None
+
 
     def onScaleMotion(self, event):
         x0,y0 = (self.x, self.y)
@@ -450,6 +497,22 @@ class Paint(object):
         scaleImg = ImageTk.PhotoImage(img)
         return scaleImg
 
+
+    #Rotacion
+    def moveRotation(self,pixelList, center, alpha, bc, img):
+        for i in range(0, len(pixelList) - 1):
+            pixel = self.pixelList[i]
+
+            centerX = center[0]
+            centerY = center[1]
+
+            x = centerX + int(math.cos(alpha) * (pixel[0][0] - centerX) - math.sin(alpha) * (pixel[0][1] - centerY ))
+            y = centerY + int(math.sin(alpha) * (pixel[0][0] - centerX) + math.cos(alpha) * (pixel[0][1] - centerY ))
+
+            img.putpixel((x, y), pixel[1])
+
+        roateImg = ImageTk.PhotoImage(img)
+        return roateImg   
 
     #Guarda los pixeles de un area seleccionado
     def cropping(self, startPoint, endPoint, bc, img):
@@ -709,7 +772,8 @@ class Paint(object):
         self.c.bind("<B1-Motion>", self.on_button_draw_pencil)
         self.c.bind("<ButtonRelease-1>", self.on_button_draw_pencil)
 
-    
+    def nothing(self,event):
+        pass
 
 if __name__ == '__main__':
     Paint()
