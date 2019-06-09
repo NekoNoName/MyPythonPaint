@@ -205,19 +205,33 @@ class Paint(object):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
         paper=copy.copy(self.paper)
-        radio= int(abs((x2+x1)/2-x2))
-        cx=int((x2+x1)/2)
-        cy=int((y2+y1)/2)
-        self.circleImg=self.drawCircleDDA(radio, cx, cy, paper)
+        if self.circle:    
+            radio= int(abs((x2+x1)/2-x2))
+            cx=int((x2+x1)/2)
+            cy=int((y2+y1)/2)
+            self.circleImg=self.drawCircleDDA(radio, cx, cy, paper)
+        else:
+            radioX= int(abs((x2+x1)/2-x2))  
+            radioY= int(abs((y2+y1)/2-y2))
+            cx=int((x2+x1)/2)
+            cy=int((y2+y1)/2)
+            self.circleImg=self.drawElipse(cx, cy, radioX, radioY, self.colors, paper)
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
 
     def onReleaseCircle(self, event):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
-        radio= int(abs((x2+x1)/2-x2))
-        cx=int((x2+x1)/2)
-        cy=int((y2+y1)/2)
-        self.circleImg=self.drawCircleDDA(radio, cx, cy, self.paper)
+        if self.circle:    
+            radio= int(abs((x2+x1)/2-x2))
+            cx=int((x2+x1)/2)
+            cy=int((y2+y1)/2)
+            self.circleImg=self.drawCircleDDA(radio, cx, cy, self.paper)
+        else:
+            radioX= int(abs((x2+x1)/2-x2))  
+            radioY= int(abs((y2+y1)/2-y2))
+            cx=int((x2+x1)/2)
+            cy=int((y2+y1)/2)
+            self.circleImg=self.drawElipse(cx, cy, radioX, radioY, self.colors, self.paper)
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
 
 
@@ -253,20 +267,20 @@ class Paint(object):
         self.c.bind("<B1-Motion>", self.onMotionCircle)
         self.c.bind("<ButtonRelease-1>", self.onReleaseCircle)
         self.circle=True
-        self.line_DDA=False
         self.rad=float(self.cir.get())
         #self.circleImg=self.drawCircleDDA(self.rad, cx, cy,self.paper)
         #self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.circleImg)
 
     #Funcion elipse
     def elipse(self):
-        cx= int(self.cx.get())
-        cy= int(self.cy.get())
-        self.circle=True
-        self.line_DDA=False
-        self.radX=float(self.cir.get())
-        self.radY=float(self.ry.get())
-        self.elipseImg=self.drawElipse(cx,cy,self.radX, self.radY, self.colors, self.paper)
+        self.activate_button(self.elipse_button)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onMotionCircle)
+        self.c.bind("<ButtonRelease-1>", self.onReleaseCircle)
+        self.circle=False
+        
+        
+        #self.elipseImg=self.drawElipse(cx,cy,self.radX, self.radY, self.colors, self.paper)
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.elipseImg)
 
 
