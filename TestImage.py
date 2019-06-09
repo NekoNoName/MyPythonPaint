@@ -17,14 +17,17 @@ class Paint(object):
     blueLight = (0, 153, 204)
     blueMalibu = (102, 204, 255)
     purple = (102, 0, 204)  
-    colors=dark    
+    colors=dark 
+    bc=white   
     DEFAULT_PEN_SIZE = 5.0
     DEFAULT_COLOR = 'black'
     x=0
     y=0
     xf=0
     yf=0
-    
+    scale=False
+    rotate=False
+    traslate=False
     pixelList=[]
     clicks=0
     paperWidht=1024
@@ -51,19 +54,19 @@ class Paint(object):
 
         #Boton Triangulo
         self.triang_button = Button(self.root, text='Triangulo', command=self.triangulo)
-        self.triang_button.grid(row=0, column=4)
+        self.triang_button.grid(row=0, column=3)
 
         #Boton Bresenham
         self.Bresenham_button = Button(self.root, text='Bresenham', command=self.Bresenham)
-        self.Bresenham_button.grid(row=0, column=10)
+        self.Bresenham_button.grid(row=0, column=2)
 
         #Boton box
         self.Box_button = Button(self.root, text = 'Box', command= self.box)
         self.Box_button.grid(row=0, column=12)
 
-        #Boton para hacer lineas con clicks
-        self.algo_button = Button(self.root, text='Lineas', command=self.do_something)
-        self.algo_button.grid(row=0, column=18)
+        #Boton Rotacion
+        self.rotate_button = Button(self.root, text='Rotacion', command=self.rotationTool)
+        self.rotate_button.grid(row=0, column=18)
 
         #Boton Elipse
         self.elipse_button = Button(self.root, text="Elipse", command= self.elipse)
@@ -77,6 +80,11 @@ class Paint(object):
         #Boton Translacion
         self.transi_button = Button (self.root, text="Translacion", command=self.transitionTool)
         self.transi_button.grid(row=0, column=22)
+        
+        #Boton Escala
+        self.scale_button = Button(self.root, text='Escalado', command=self.scalingTool)
+        self.scale_button.grid(row=0, column=5)
+
 
         #Resto de botones que vinieron con el codigo
         self.color_button = Button(self.root, text='color', command=self.choose_color)
@@ -112,34 +120,9 @@ class Paint(object):
         self.ry=Entry(self.root)
         self.ry.grid(row=1, column=20)
 
-        #Entrada de Datos Triangulo
-        self.tr= Entry(self.root)
-        self.tr.grid(row=1, column=4)
-
-        self.tr2= Entry(self.root)
-        self.tr2.grid(row=2, column=4)
-
-        self.tr3= Entry(self.root)
-        self.tr3.grid(row=3, column=4)
-
-        self.tr4= Entry(self.root)
-        self.tr4.grid(row=4, column=4)
-
-        self.tr5= Entry(self.root)
-        self.tr5.grid(row=1, column=6)
-
-        self.tr6= Entry(self.root)
-        self.tr6.grid(row=2, column=6)
+       
 
         
-
-        #Los Labels Triangulo
-        Label(self.root, text="X1").grid(row=1, column=3)
-        Label(self.root, text="Y1").grid(row=2, column=3)
-        Label(self.root, text="X2").grid(row=3, column=3)
-        Label(self.root, text="Y2").grid(row=4, column=3)
-        Label(self.root, text="X3").grid(row=1, column=5)
-        Label(self.root, text="Y3").grid(row=2, column=5)
 
         #Los Labels del Circulo
         Label(self.root, text="Radio").grid(row=1, column=7)
@@ -182,17 +165,6 @@ class Paint(object):
         #self.c.bind('<ButtonRelease-1>', self.reset)
         self.c.bind("<Motion>", self.canxy)
 
-
-
-
-
-    #Accion del boton Linea
-    def do_something(self):
-        self.activate_button(self.algo_button)
-        self.lapiz_on=False
-        self.line=True
-        self.c.configure(cursor="cross")
-      
 
 
     #Accion de la funcion linea, lee la posicion del click y crea la linea si es el segundo click
@@ -281,18 +253,18 @@ class Paint(object):
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg3)
     
     def onTrianguloMotion(self, event):
-        x1,y1=int(self.x), int(self.y)
-        x2,y2=x1, int(event.y)
-        x3=int(x2+x1/2)
-        y3=y2 
+        x1,y1=int(self.x), int(event.y)  
+        x2,y2=int(event.x), int(event.y)
+        x3=int((x2+x1)/2)
+        y3=int(self.y) 
         paper=copy.copy(self.paper)
         self.drawTriangulo(x1,y1,x2,y2,x3,y3,paper)
     
     def onTrianguloRelease(self, event):
-        x1,y1=int(self.x), int(self.y)
-        x2,y2=x1, int(event.y)
-        x3=int(x2+x1/2)
-        y3=y2 
+        x1,y1=int(self.x), int(event.y)  
+        x2,y2=int(event.x), int(event.y)
+        x3=int((x2+x1)/2)
+        y3=int(self.y) 
         self.drawTriangulo(x1,y1,x2,y2,x3,y3,self.paper)
         
 
@@ -338,6 +310,31 @@ class Paint(object):
 
     def transitionTool(self):
         self.activate_button(self.transi_button)
+        self.traslate=True
+        self.rotate=False
+        self.scale=False
+        self.c.config(cursor="crosshair")
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onChoosingMotion)
+        self.c.bind("<ButtonRelease-1>", self.onChoosingRelease)
+
+
+    def rotationTool(self):
+        print ("Rotate tool")
+        self.activate_button(self.rotate_button)
+        self.rotate=True
+        self.traslate=False
+        self.scale=False
+        self.c.config(cursor="crosshair")
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onChoosingMotion)
+        self.c.bind("<ButtonRelease-1>", self.onChoosingRelease)
+ 
+    def scalingTool(self):
+        self.activate_button(self.scale_button)
+        self.scale=True
+        self.rotate=False
+        self.traslate=False
         self.c.config(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onChoosingMotion)
@@ -355,10 +352,20 @@ class Paint(object):
         x1,y1 = (event.x, event.y)
         self.transitionPlace = ((x0, y0), (x1, y1))
         self.c.config(cursor="crosshair")
-        self.c.bind("<ButtonPress-1>", self.on_button_press)
-        self.c.bind("<B1-Motion>", self.onTransitionMotion)
-        self.c.bind("<ButtonRelease-1>", self.onTransitionRelease)
-        
+        if self.traslate:
+            self.c.bind("<ButtonPress-1>", self.onClickPress)
+            self.c.bind("<B1-Motion>", self.onTransitionMotion)
+            self.c.bind("<ButtonRelease-1>", self.onTransitionRelease)
+        if self.scale:
+            self.c.bind("<ButtonPress-1>", self.onClickPress)
+            self.c.bind("<B1-Motion>", self.onScaleMotion)
+            self.c.bind("<ButtonRelease-1>", self.onScaleRelease)    
+        if self.rotate:
+            self.c.bind("<ButtonPress-1>", self.onClickPress)
+            self.c.bind("<B1-Motion>", self.onRotationMotion)
+            self.c.bind("<ButtonRelease-1>", self.onRotateScale)
+
+
     def onTransitionMotion(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
@@ -384,6 +391,37 @@ class Paint(object):
         self.pixelList = None
         self.transitionTool()
 
+    def onScaleMotion(self, event):
+        x0,y0 = (self.x, self.y)
+        x1,y1 = (event.x, event.y)
+
+        paper = copy.copy(self.paper)
+        scaleX = x1/float(x0)
+        scaleY = y1/float(y0)
+
+        if not self.pixelList:
+            self.pixelList = self.cropping(self.transitionPlace[0], self.transitionPlace[1], self.bc, paper)
+
+        self.scaleImg = self.scalling(self.pixelList, (x0, y0), (scaleX, scaleY), paper)
+        self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.scaleImg)
+
+    def onScaleRelease(self, event):
+        x0,y0 = (self.x, self.y)
+        x1,y1 = (event.x, event.y)
+
+        scaleX = x1/float(x0)
+        scaleY = y1/float(y0)
+
+        if self.pixelList:
+            self.eraseSelectedCropping(self.pixelList, self.bc, self.paper)
+
+        self.scaleImg = self.scalling(self.pixelList, (x0, y0), (scaleX, scaleY), self.paper)
+        self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.scaleImg)
+
+        self.pixelList = None
+        self.scalingTool()
+
+
     def moveTransition(self, pixelList, newPoint, bc, img):
         deltaX = newPoint[0] - pixelList[0][0][0]
         deltaY = newPoint[1] - pixelList[0][0][1]
@@ -394,6 +432,24 @@ class Paint(object):
 
         transitImg = ImageTk.PhotoImage(img)
         return transitImg
+
+    #Escalado de imagen
+    def scalling(self, pixelList, center, scale, img):
+        centerX = center[0]
+        centerY = center[1]
+
+        # render new pattern based on coordinate of newPoint
+        for i in range(0, len(pixelList) - 1):
+            pixel = self.pixelList[i]
+
+            x = centerX + int(round((pixel[0][0] - centerX) * scale[0]))
+            y = centerY + int(round((pixel[0][1] - centerY) * scale[1]))
+
+            img.putpixel((x, y), pixel[1])
+
+        scaleImg = ImageTk.PhotoImage(img)
+        return scaleImg
+
 
     #Guarda los pixeles de un area seleccionado
     def cropping(self, startPoint, endPoint, bc, img):
@@ -649,13 +705,11 @@ class Paint(object):
         self.lapiz_on=True
         self.line=False
         self.c.configure(cursor="crosshair")
-        self.c.bind("<ButtonPress-1>", self.on_button_press)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.on_button_draw_pencil)
         self.c.bind("<ButtonRelease-1>", self.on_button_draw_pencil)
 
-    def on_button_press(self, event):
-        self.old_x = event.x
-        self.old_y = event.y
+    
 
 if __name__ == '__main__':
     Paint()
