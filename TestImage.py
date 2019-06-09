@@ -25,6 +25,7 @@ class Paint(object):
     xf=0
     yf=0
     points=[]
+    pixelList=[]
     clicks=0
     paperWidht=1024
     paperHeight=720
@@ -76,10 +77,15 @@ class Paint(object):
         self.fill_button.grid(row=0, column=24)
 
 
+        #Boton Translacion
+        self.transi_button = Button (self.root, text="Translacion", command=self.transitionTool)
+        self.transi_button.grid(row=0, column=22)
+
         #Resto de botones que vinieron con el codigo
         self.color_button = Button(self.root, text='color', command=self.choose_color)
-        self.color_button.grid(row=0, column=22)
+        self.color_button.grid(row=0, column=25)
 
+        
         self.eraser_button = Button(self.root, text='eraser', command=self.use_eraser)
         self.eraser_button.grid(row=0, column=23)
 
@@ -91,7 +97,7 @@ class Paint(object):
 
         #El Canvas
         self.c = Canvas(self.root, bg='white', width=self.paperWidht, height=self.paperHeight)
-        self.c.grid(row=8, columnspan=24)
+        self.c.grid(row=8, columnspan=28)
 
 
         #Entrada de Datos DDA y Bresenham
@@ -353,24 +359,23 @@ class Paint(object):
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg2)
         self.lineImg3=self.drawDDA(x1,y1,x3,y3, self.paper)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg3)
-
-    #Funcion Box
     def box(self):
         x1=int(self.t.get())
-
         y1=int(self.t2.get())
-
         x2=int(self.t3.get())
-
         y2=int(self.t4.get())
+        self.drawBox(x1,y1,x2,y2,self.paper)
 
-        self.lineImg=self.drawDDA(x1,y1,x1,y2, self.paper)
+    #Funcion Box
+    def drawBox(self,x1,y1,x2,y2, img):
+        
+        self.lineImg=self.drawDDA(x1,y1,x1,y2, img)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
-        self.lineImg=self.drawDDA(x1,y1,x2,y1, self.paper)
+        self.lineImg=self.drawDDA(x1,y1,x2,y1, img)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
-        self.lineImg=self.drawDDA(x1,y2,x2,y2, self.paper)
+        self.lineImg=self.drawDDA(x1,y2,x2,y2, img)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
-        self.lineImg=self.drawDDA(x2,y1,x2,y2, self.paper)
+        self.lineImg=self.drawDDA(x2,y1,x2,y2, img)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg)
 
     #Funcion relleno
@@ -382,6 +387,88 @@ class Paint(object):
     def release(self, event):
         pass    
 
+    def transitionTool(self):
+        self.activate_button(self.transi_button)
+        self.c.config(cursor="crosshair")
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onChoosingMotion)
+        self.c.bind("<ButtonRelease-1>", self.onChoosingRelease)
+
+
+    def onChoosingMotion(self, event):
+        x0,y0 = (self.x, self.y)
+        x1,y1 = (event.x, event.y)
+        paper = copy.copy(self.paper)
+        self.drawBox(x0,y0, x1, y1, paper)
+
+    def onChoosingRelease(self, event):
+        x0,y0 = (self.x, self.y)
+        x1,y1 = (event.x, event.y)
+        self.transitionPlace = ((x0, y0), (x1, y1))
+        self.c.config(cursor="crosshair")
+        self.c.bind("<ButtonPress-1>", self.on_button_press)
+        self.c.bind("<B1-Motion>", self.on_button_transition_motion)
+        self.c.bind("<ButtonRelease-1>", self.on_button_release_transition)
+        
+    def on_button_transition_motion(self, event):
+        x0,y0 = (self.x, self.y)
+        x1,y1 = (event.x, event.y)
+
+        paper = copy.copy(self.paper)
+        bg=(255,255,255)
+        if not self.pixelList:
+            self.pixelList = self.cropping(self.transitionPlace[0], self.transitionPlace[1], bg, paper)
+
+        self.transitImg = self.moveTransition(self.pixelList, (x1, y1), bg, paper)
+        self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.transitImg)
+
+    def on_button_release_transition(self, event):
+        x0,y0 = (self.x, self.y)
+        x1,y1 = (event.x, event.y)
+        bg=(255,255,255)
+        if self.pixelList:
+            self.eraseSelectedCropping(self.pixelList, bg, self.paper)
+
+        self.transitImg = self.moveTransition(self.pixelList, (x1, y1), bg, self.paper)
+        self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.transitImg)
+
+        self.pixelList = None
+        self.transitionTool()
+
+    def moveTransition(self, pixelList, newPoint, bc, img):
+        deltaX = newPoint[0] - pixelList[0][0][0]
+        deltaY = newPoint[1] - pixelList[0][0][1]
+
+        for i in range(0, len(pixelList) - 1):
+            pixel = pixelList[i]
+            img.putpixel((pixel[0][0] + deltaX, pixel[0][1] + deltaY), pixel[1])
+
+        transitImg = ImageTk.PhotoImage(img)
+        return transitImg
+
+    #Guarda los pixeles de un area seleccionado
+    def cropping(self, startPoint, endPoint, bc, img):
+        pixelList = []
+
+        x0 = startPoint[0]
+        y0 = startPoint[1]
+        x1 = endPoint[0]
+        y1 = endPoint[1]
+
+        if y0 > y1:
+            y0, y1 = y1, y0
+        if x0 > x1:
+            x0, x1 = x1, x0
+
+        for j in range(y0, y1):
+            for i in range(x0, x1):
+                if img.getpixel((i, j)) != bc:
+                    color = img.getpixel((i, j))
+                    pixelObj = ((i,j), color)
+                    pixelList.append(pixelObj)
+                    img.putpixel((i,j), bc)
+
+        return pixelList
     #Escoger Color
     def choose_color(self):
         self.eraser_on = False
@@ -572,8 +659,22 @@ class Paint(object):
 
         filledImg = ImageTk.PhotoImage(img)
         
-        print("fin")
         return filledImg
+    
+    def on_button_choosing_place_motion(self, event):
+        x0,y0 = (self.x, self.y)
+        x1,y1 = (event.x, event.y)
+
+        paper = copy.copy(self.paper)
+        self.drawBox(x0,y0, x1, y1,paper)
+        
+
+    
+    def eraseSelectedCropping(self, pixelList, bc, img):
+        for i in self.pixelList:
+            img.putpixel(i[0], bc)
+
+
     #Para saber las coordenadas del cursor en el canvas
     def canxy(self, event):
         self.root.title(" Algoritmos ( %i , %i)" %(event.x, event.y))
