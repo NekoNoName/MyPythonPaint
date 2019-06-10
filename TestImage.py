@@ -2,7 +2,6 @@ import math
 from tkinter import *
 from tkinter.colorchooser import askcolor
 from tkinter import filedialog
-import math
 import copy
 from PIL import Image, ImageTk, ImageDraw, ImageColor
 
@@ -11,7 +10,7 @@ class Paint(object):
     #Declaracion de directorio de los iconos
     DDAIcon='./icon/lineaDDA.png'
     BreseIcon='./icon/lineaBre.png'
-    LapizIcon='./icon/pencil-tool.png'
+    LapizIcon='./icon/edit.png'
     CircleIcon='./icon/circle-outline.png'
     ElipseIcon='./icon/elipse.png'
     TriaIcon='./icon/triangle.png'
@@ -30,11 +29,9 @@ class Paint(object):
     colors=dark 
     bc=white   
 
-    
+    #Variable utilizadas dentro del entorno
     x=0
     y=0
-    xf=0
-    yf=0
     scale=False
     rotate=False
     traslate=False
@@ -48,6 +45,8 @@ class Paint(object):
         self.root = Tk()
         #Titulo de la ventana
         self.root.title("Algoritmos")
+        
+        #Menu desplegable
         menubar = Menu(self.root)
         fileMenu = Menu(menubar, tearoff=0)
         menubar.add_cascade(label="File", menu=fileMenu)
@@ -58,6 +57,7 @@ class Paint(object):
         fileMenu.add_command(label="Exit", command=self.root.quit)
         self.root.config(menu=menubar)
         
+        #Creacion de iconos para poner en los botones
         self.iconDDA=PhotoImage(file=self.DDAIcon)
         self.iconBre=PhotoImage(file=self.BreseIcon)
         self.iconPencil=PhotoImage(file=self.LapizIcon)
@@ -157,6 +157,8 @@ class Paint(object):
     
 
         self.bgcolor="white"
+
+        #Creando la Imagen que sera usado como el papel
         self.paper = Image.new("RGB", (self.paperWidht,self.paperHeight), self.bgcolor)
         self.usePaper = ImageTk.PhotoImage(self.paper)
         self.c.img = self.usePaper
@@ -166,7 +168,21 @@ class Paint(object):
         #Parte del codigo de la ventana grafica.
         self.root.mainloop()
 
-   
+    def setup(self):
+        self.eraser_on = False
+        self.lapiz_on=True
+        self.line=False
+        self.line_DDA=True
+        self.circle=False
+        self.c.configure(cursor="crosshair")
+        self.active_button = self.pen_button
+        self.activate_button(self.pen_button)
+        self.c.bind("<ButtonPress-1>", self.onClickPress)
+        self.c.bind("<B1-Motion>", self.onPencilDraw)
+        self.c.bind("<ButtonRelease-1>", self.onPencilDraw)
+        self.c.bind("<Motion>", self.canxy)
+
+
     #Funcion para iniciar datos, vino con el codigo base pero decidi aprovecharlo
     def callOpenImage(self):
         self.fOpenName = filedialog.askopenfilename(filetypes=(("Supported Image Files", "*.jpg; *.jpeg; *.png; *.bmp; *.ico"),
@@ -196,37 +212,17 @@ class Paint(object):
         if not fname: # asksaveasfile return `None` if dialog closed with "cancel".
             return
         self.paper.save(fname)
-    def setup(self):
-       
-        self.old_x = None
-        self.old_y = None
-        self.line_width = self.choose_size_button.get()
-        self.color = self.DEFAULT_COLOR
-        
-        self.eraser_on = False
-        self.lapiz_on=True
-        self.line=False
-        self.line_DDA=True
-        self.circle=False
-        self.c.configure(cursor="crosshair")
-        self.active_button = self.pen_button
-        self.activate_button(self.pen_button)
-        self.c.bind("<ButtonPress-1>", self.onClickPress)
-        self.c.bind("<B1-Motion>", self.onPencilDraw)
-        self.c.bind("<ButtonRelease-1>", self.onPencilDraw)
-        self.c.bind("<Motion>", self.canxy)
+    
 
-
-
-    #Accion de la funcion linea, lee la posicion del click y crea la linea si es el segundo click
     
     def clearCanvas(self):
         self.c.delete("all")
         self.paper = Image.new("RGB", (self.paperWidht,self.paperHeight), self.bgcolor)
 
+    #GUarda la coordenada del click
     def onClickPress(self, event):
         self.x, self.y = event.x, event.y
-
+    #Crea las lineas mientras se mueve, no es permanente
     def onMotionLine(self, event):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
@@ -236,7 +232,7 @@ class Paint(object):
         else:
             self.lineImg=self.drawBresenham(x1,y1,x2,y2,paper)
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.lineImg)
-
+    #Crea la linea final
     def onReleaseLine(self, event):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
@@ -246,12 +242,14 @@ class Paint(object):
             self.lineImg=self.drawBresenham(x1,y1,x2,y2,self.paper)
        
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image=self.lineImg)
-
+    #Crea el circulo o elipse temporal
     def onMotionCircle(self, event):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
         paper=copy.copy(self.paper)
+        #Si es circulo
         if self.circle:    
+            #Obtengo Radio de la distancia media de la mitad de x a x2 
             radio= int(abs((x2+x1)/2-x2))
             cx=int((x2+x1)/2)
             cy=int((y2+y1)/2)
@@ -289,7 +287,6 @@ class Paint(object):
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onMotionLine)
         self.c.bind("<ButtonRelease-1>", self.onReleaseLine)
-        #self.lapiz_on=False
         #self.label1.config(text="DDA")
   
  
@@ -644,7 +641,6 @@ class Paint(object):
         #self.activate_button(self.eraser_button, eraser_mode=True)
 
     def eraser_motion(self,event):
-        print("Borro")
         size = self.choose_size_button.get()
         puntos=(self.x, self.y, event.x, event.y)
         #self.c.create_line(self.x, self.y, event.x, event.y, width=size, fill="white")
