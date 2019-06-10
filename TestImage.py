@@ -44,7 +44,7 @@ class Paint(object):
         #La ventana
         self.root = Tk()
         #Titulo de la ventana
-        self.root.title("Algoritmos")
+        self.root.title("MyPythonPaint")
         
         #Menu desplegable
         menubar = Menu(self.root)
@@ -919,7 +919,7 @@ class Paint(object):
 
     #Para saber las coordenadas del cursor en el canvas
     def canxy(self, event):
-        self.root.title(" Algoritmos ( %i , %i)" %(event.x, event.y))
+        self.root.title(" MyPythonPaint ( %i , %i)" %(event.x, event.y))
 
     def pencil(self, previousPoint, pointNow, color, img):
         draw = ImageDraw.Draw(img)
