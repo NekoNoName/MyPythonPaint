@@ -74,8 +74,11 @@ class Paint(object):
         self.iconClear=PhotoImage(file=self.ClearIcon)
 
         #Los botones
-        
+        self.algoritmo= Label(self.root, text="Lapiz")
+        self.algoritmo.grid(row=1, column=16)
         #Botones de la primera fila
+        self.actualColor= Button(self.root, bg="black", height="1", width="2")
+        self.actualColor.grid(row=0, column=9)
         #Boton Limpiar Canvas
         self.clear_button = Button(self.root, text='Limpiar', image=self.iconClear, width="30", height="30",command=self.clearCanvas)
         self.clear_button.grid(row=1, column=10)
@@ -281,6 +284,7 @@ class Paint(object):
 
     #Corre Algoritmo DDA
     def dda(self):
+        self.algoritmo.configure(text="DDA")
         self.line_DDA=True
         self.activate_button(self.brush_button)
         self.c.configure(cursor="crosshair")
@@ -292,7 +296,7 @@ class Paint(object):
  
     #Algoritmo Bresenham
     def Bresenham(self):
-     
+        self.algoritmo.configure(text="Bresenham")
         self.line_DDA=False
         #self.label1.config(text="Bresenham")
         self.c.configure(cursor="crosshair")
@@ -304,6 +308,7 @@ class Paint(object):
 
     #Funcion Circulo
     def circulo(self):
+        self.algoritmo.configure(text="Círculo")
         self.activate_button(self.circulo_button)
         self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
@@ -314,6 +319,7 @@ class Paint(object):
        
     #Funcion elipse
     def elipse(self):
+        self.algoritmo.configure(text="Elipse")
         self.activate_button(self.elipse_button)
         self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
@@ -326,6 +332,7 @@ class Paint(object):
 
     #Funcion Triangulo
     def triangulo(self):
+        self.algoritmo.configure(text="Triángulo")
         self.activate_button(self.triang_button)
         self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
@@ -357,6 +364,7 @@ class Paint(object):
         
 
     def box(self):
+        self.algoritmo.configure(text="Cuadros")
         self.activate_button(self.Box_button)
         self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
@@ -390,6 +398,7 @@ class Paint(object):
 
     #Funcion relleno
     def fill(self):
+        self.algoritmo.configure(text="Relleno")
         self.activate_button(self.fill_button)
         self.c.configure(cursor="spraycan")
         self.c.bind("<ButtonPress-1>", self.fillColors)
@@ -400,6 +409,7 @@ class Paint(object):
         pass    
 
     def transitionTool(self):
+        self.algoritmo.configure(text="Traslación")
         self.activate_button(self.transi_button)
         self.traslate=True
         self.rotate=False
@@ -413,6 +423,7 @@ class Paint(object):
 
     def rotationTool(self):
         print ("Rotate tool")
+        self.algoritmo.configure(text="Rotación")
         self.activate_button(self.rotate_button)
         self.rotate=True
         self.traslate=False
@@ -424,6 +435,7 @@ class Paint(object):
         self.c.bind("<ButtonRelease-1>", self.onChoosingRelease)
  
     def scalingTool(self):
+        self.algoritmo.configure(text="Escalado")
         self.activate_button(self.scale_button)
         self.scale=True
         self.rotate=False
@@ -626,11 +638,13 @@ class Paint(object):
     #Escoger Color
     def choose_color(self):
         self.eraser_on = False
-        self.color = askcolor()[0]
-        self.colors=(int(self.color[0]), int(self.color[1]), int(self.color[2]))
+        self.color = askcolor()
+        self.actualColor.configure(bg=self.color[1])
+        self.colors=(int(self.color[0][0]), int(self.color[0][1]), int(self.color[0][2]))
 
     #Activa Borrador
     def use_eraser(self):
+        self.algoritmo.configure(text="Borrador")
         self.activate_button(self.eraser_button)
         self.c.configure(cursor="crosshair")
         self.c.bind("<ButtonPress-1>", self.onClickPress)
@@ -877,6 +891,7 @@ class Paint(object):
 
     #Accion del boton Lapiz
     def use_pen(self):
+        self.algoritmo.configure(text="Lapiz")
         self.activate_button(self.pen_button)
         self.lapiz_on=True
         self.line=False
