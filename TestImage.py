@@ -38,7 +38,7 @@ class Paint(object):
     pixelList=[]
     points=[]
     clicks=0
-    paperWidht=1024
+    paperWidht=1200
     paperHeight=720
     def __init__(self):
         #La ventana
@@ -76,6 +76,20 @@ class Paint(object):
         #Los botones
         self.algoritmo= Label(self.root, text="Lapiz")
         self.algoritmo.grid(row=1, column=16)
+
+        self.puntosIni=Label(self.root, text="Puntos Iniciales")
+        self.puntosIni.grid(row=0, column=25)
+
+        self.puntosIniciales=Label(self.root, text="")
+        self.puntosIniciales.grid(row=1, column=25)
+   
+
+        self.puntosF=Label(self.root, text="Puntos Finales")
+        self.puntosF.grid(row=2, column=25)
+        
+        self.puntosFin=Label(self.root, text="")
+        self.puntosFin.grid(row=3, column=25)
+        
         #Botones de la primera fila
         self.actualColor= Button(self.root, bg="black", height="1", width="2")
         self.actualColor.grid(row=0, column=9)
@@ -152,7 +166,7 @@ class Paint(object):
 
         #El Canvas
         self.c = Canvas(self.root, bg='white', width=self.paperWidht, height=self.paperHeight)
-        self.c.grid(row=8, columnspan=24)
+        self.c.grid(row=10, columnspan=24)
 
 
        
@@ -225,10 +239,14 @@ class Paint(object):
     #GUarda la coordenada del click
     def onClickPress(self, event):
         self.x, self.y = event.x, event.y
+        stringo=str(self.x) + ", "+str(self.y)
+        self.puntosIniciales.configure(text=stringo)
     #Crea las lineas mientras se mueve, no es permanente
     def onMotionLine(self, event):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         paper=copy.copy(self.paper)
         if self.line_DDA:
             self.lineImg=self.drawDDA(x1,y1,x2,y2, paper)
@@ -239,6 +257,8 @@ class Paint(object):
     def onReleaseLine(self, event):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         if self.line_DDA:
             self.lineImg=self.drawDDA(x1,y1,x2,y2, self.paper)
         else:
@@ -249,6 +269,8 @@ class Paint(object):
     def onMotionCircle(self, event):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         paper=copy.copy(self.paper)
         #Si es circulo
         if self.circle:    
@@ -268,6 +290,8 @@ class Paint(object):
     def onReleaseCircle(self, event):
         x1,y1 =self.x, self.y
         x2, y2 = event.x, event.y
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         if self.circle:    
             radio= int(abs((x2+x1)/2-x2))
             cx=int((x2+x1)/2)
@@ -348,6 +372,8 @@ class Paint(object):
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.lineImg3)
     
     def onTrianguloMotion(self, event):
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         x1,y1=int(self.x), int(event.y)  
         x2,y2=int(event.x), int(event.y)
         x3=int((x2+x1)/2)
@@ -356,6 +382,8 @@ class Paint(object):
         self.drawTriangulo(x1,y1,x2,y2,x3,y3,paper)
     
     def onTrianguloRelease(self, event):
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         x1,y1=int(self.x), int(event.y)  
         x2,y2=int(event.x), int(event.y)
         x3=int((x2+x1)/2)
@@ -375,12 +403,16 @@ class Paint(object):
     def onBoxMotion(self, event):
         x1,y1=self.x, self.y
         x2,y2=event.x, event.y
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         paper=copy.copy(self.paper)
         self.drawBox(x1,y1,x2,y2,paper)
 
     def onBoxRelease(self, event):
         x1,y1=self.x, self.y
         x2,y2=event.x, event.y
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         self.drawBox(x1,y1,x2,y2,self.paper)   
 
 
@@ -450,12 +482,16 @@ class Paint(object):
     def onChoosingMotion(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         paper = copy.copy(self.paper)
         self.drawBox(x0,y0, x1, y1, paper)
 
     def onChoosingRelease(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         self.transitionPlace = ((x0, y0), (x1, y1))
         self.c.config(cursor="crosshair")
         if self.traslate:
@@ -475,7 +511,8 @@ class Paint(object):
     def onTransitionMotion(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
-
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         paper = copy.copy(self.paper)
         bg=(255,255,255)
         if not self.pixelList:
@@ -487,6 +524,8 @@ class Paint(object):
     def onTransitionRelease(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         bg=(255,255,255)
         if self.pixelList:
             self.eraseSelectedCropping(self.pixelList, bg, self.paper)
@@ -500,7 +539,8 @@ class Paint(object):
     def onRotateMotion(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
-
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         paper = copy.copy(self.paper)
 
         if x1 > x0:
@@ -520,7 +560,8 @@ class Paint(object):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
         alpha = math.atan(y1 / float(x1))
-
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         if x1 > x0:
             alpha = math.atan((y0-y1) / float(x0-x1))
         else:
@@ -539,7 +580,8 @@ class Paint(object):
     def onScaleMotion(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
-
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         paper = copy.copy(self.paper)
         scaleX = x1/float(x0)
         scaleY = y1/float(y0)
@@ -553,7 +595,8 @@ class Paint(object):
     def onScaleRelease(self, event):
         x0,y0 = (self.x, self.y)
         x1,y1 = (event.x, event.y)
-
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosFin.configure(text=stringo)
         scaleX = x1/float(x0)
         scaleY = y1/float(y0)
 
@@ -660,6 +703,8 @@ class Paint(object):
         #self.c.create_line(self.x, self.y, event.x, event.y, width=size, fill="white")
         self.img=self.eraser(puntos, size, self.paper)
         self.x, self.y = event.x, event.y
+        stringo=str(self.x) + ", "+str(self.y)
+        self.puntosIniciales.configure(text=stringo)
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.img)
         
     
@@ -703,7 +748,7 @@ class Paint(object):
     #Algoritmo DDA
     def drawDDA(self,x1,y1,x2,y2, img):
             #x1,y1 = x1,y1
-            print("DDA line algorithm")
+            #print("DDA line algorithm")
             self.length = abs(x2-x1) if abs(x2-x1) >= abs(y2-y1) else abs(y2-y1)
             if self.length>0:
                 dx = (x2-x1)/float(self.length)
@@ -721,7 +766,7 @@ class Paint(object):
             return lineImg
     #Algoritmo Bresenham
     def drawBresenham(self,x1,y1,x2,y2, img):
-        print("Bresenham's line algorithm")
+        #print("Bresenham's line algorithm")
         dx = abs(x2 - x1)
         dy = abs(y2 - y1)
         x, y = x1, y1
@@ -765,7 +810,7 @@ class Paint(object):
     
     #Algoritmo Circulo DDA
     def drawCircleDDA(self,rad, cx, cy, img):
-        print("Circle Algorithm")
+      #  print("Circle Algorithm")
         rx= rad
         x= round(rx)
         y=0
@@ -823,6 +868,9 @@ class Paint(object):
     
     def fillColors(self, event):
         center=(event.x, event.y)
+        stringo=str(event.x) + ", "+str(event.y)
+        self.puntosIniciales.configure(text=stringo)
+        self.puntosFin.configure(text=stringo)
         self.filledImg=self.fillColor(center, self.paper)
         self.c.create_image(self.paperWidht/2, self.paperHeight/2, image= self.filledImg)
 
@@ -888,6 +936,8 @@ class Paint(object):
         self.c.create_image(self.paperWidht / 2, self.paperHeight / 2, image=self.pencilImg)
         self.x = event.x
         self.y = event.y
+        stringo=str(self.x) + ", "+str(self.y)
+        self.puntosIniciales.configure(text=stringo)
 
     #Accion del boton Lapiz
     def use_pen(self):
@@ -896,7 +946,7 @@ class Paint(object):
         self.lapiz_on=True
         self.line=False
         self.c.configure(cursor="crosshair")
-        print('Icono de cursor obtenido de: "https://www.freepik.com/?__hstc=57440181.dfb3ad532d753cdc1cb7d881068f2af0.1560116626434.1560116626434.1560116626434.1&__hssc=57440181.2.1560116626435&__hsfp=2958300247" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0')
+        #print('Icono de cursor obtenido de: "https://www.freepik.com/?__hstc=57440181.dfb3ad532d753cdc1cb7d881068f2af0.1560116626434.1560116626434.1560116626434.1&__hssc=57440181.2.1560116626435&__hsfp=2958300247" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0')
         self.c.bind("<ButtonPress-1>", self.onClickPress)
         self.c.bind("<B1-Motion>", self.onPencilDraw)
         self.c.bind("<ButtonRelease-1>", self.onPencilDraw)
